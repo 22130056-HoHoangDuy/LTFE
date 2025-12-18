@@ -1,0 +1,54 @@
+.room-list {
+    width: 280px;
+    height: 100vh;
+    background-color: #f5f5f5;
+    border-right: 1px solid #ddd;
+}
+
+.room-list-title {
+    padding: 15px;
+    margin: 0;
+    font-size: 18px;
+    border-bottom: 1px solid #ddd;
+}
+
+.room-item {
+    display: flex;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.room-item:hover {
+    background-color: #eaeaea;
+}
+
+.room-item.active {
+    background-color: #dbeafe;
+}
+
+.room-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.room-info {
+    flex: 1;
+}
+
+.room-name {
+    font-weight: bold;
+}
+
+.room-last-message {
+    font-size: 13px;
+    color: #666;
+}
