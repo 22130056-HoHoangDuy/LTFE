@@ -1,0 +1,75 @@
+:root {
+    --bg-primary: #121212; /* Màu nền chính */
+    --bg-secondary: #1E1E1E; /* Header */
+    --message-user: #1DB954; /* Tin nhắn của user */
+    --text-primary: #FFFFFF; /* Màu chữ */
+    --button-bg: #1DB954; /* Nút Send */
+    --button-hover: #17A645; /* Hover cho nút */
+}
+
+.chatbox {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.chatbox-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid #333;
+    justify-content: flex-start;
+}
+
+.back-btn {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: var(--button-hover);
+}
+
+.room-name {
+    margin: 0;
+    margin-left: 10px;
+    font-size: 1.2rem;
+    text-align: left;
+}
+
+.chatbox-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--bg-secondary);
+}
+
+.chat-input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    margin-right: 10px;
+    background-color: #1E1E1E;
+    color: var(--text-primary);
+}
+
+.send-btn {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.send-btn:hover {
+    background-color: var(--button-hover);
+}
