@@ -1,0 +1,63 @@
+:root {
+    --bg-primary: #121212; /* Nền chính */
+    --message-user: #1DB954; /* Tin nhắn của user */
+    --message-other: #3E3E3E; /* Tin nhắn của người khác */
+    --text-primary: #FFFFFF; /* Màu chữ */
+}
+
+/* Danh sách tin nhắn */
+.message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    overflow-y: auto;
+}
+
+/* Mỗi tin nhắn */
+.message-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 70%;
+}
+
+/* Tin nhắn của user */
+.user-message {
+    align-self: flex-end;
+    background-color: var(--message-user);
+    color: var(--text-primary);
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Tin nhắn của người khác */
+.other-message {
+    align-self: flex-start;
+    background-color: var(--message-other);
+    color: var(--text-primary);
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Avatar của người gửi khác */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Nội dung tin nhắn */
+.message-content p {
+    margin: 0;
+}
+
+/* Thời gian gửi */
+.timestamp {
+    font-size: 0.8em;
+    color: #b0b0b0;
+    margin-top: 5px;
+}
