@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import socketService from "../api/socket";
 import { User } from "../utils/types";
+//Thêm vào để test ChatLayout demo
+import ChatLayout from "../components/Chat/ChatLayout";
 
 type Props = {
     user: User;
@@ -40,35 +42,36 @@ export default function ChatPage({ user }: Props) {
         setMessage("");
     };
 
-    return (
-        <div style={{ padding: 16 }}>
-            <h2>Chat Page</h2>
-            <p>Logged in as: <b>{user.username}</b></p>
-
-            <div
-                style={{
-                    border: "1px solid #ccc",
-                    padding: 8,
-                    height: 300,
-                    overflowY: "auto",
-                    marginBottom: 8,
-                }}
-            >
-                {messages.map((m, i) => (
-                    <div key={i}>
-                        <b>{m.user}:</b> {m.content}
-                    </div>
-                ))}
-            </div>
-
-            <input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type message..."
-                style={{ width: "70%", marginRight: 8 }}
-            />
-
-            <button onClick={handleSend}>Send</button>
-        </div>
-    );
+    // return (
+    //     <div style={{ padding: 16 }}>
+    //         <h2>Chat Page</h2>
+    //         <p>Logged in as: <b>{user.username}</b></p>
+    //
+    //         <div
+    //             style={{
+    //                 border: "1px solid #ccc",
+    //                 padding: 8,
+    //                 height: 300,
+    //                 overflowY: "auto",
+    //                 marginBottom: 8,
+    //             }}
+    //         >
+    //             {messages.map((m, i) => (
+    //                 <div key={i}>
+    //                     <b>{m.user}:</b> {m.content}
+    //                 </div>
+    //             ))}
+    //         </div>
+    //
+    //         <input
+    //             value={message}
+    //             onChange={(e) => setMessage(e.target.value)}
+    //             placeholder="Type message..."
+    //             style={{ width: "70%", marginRight: 8 }}
+    //         />
+    //
+    //         <button onClick={handleSend}>Send</button>
+    //     </div>
+    // );
+    return <ChatLayout />;
 }
