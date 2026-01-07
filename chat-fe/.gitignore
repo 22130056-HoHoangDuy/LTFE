@@ -26,3 +26,5 @@ echo .idea/ >> .gitignore
 git add .gitignore
 git commit -m "ignore IDE config"
 git push
+
+.idea/
