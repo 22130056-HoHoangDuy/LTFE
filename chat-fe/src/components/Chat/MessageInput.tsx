@@ -31,7 +31,7 @@ const MessageInput: React.FC = () => {
                 placeholder={
                     currentChat
                         ? "Type your message..."
-                        : "Chọn room hoặc người để chat"
+                        : "Nhập tin nhắn của bạn..."
                 }
                 disabled={!currentChat}
                 style={{
