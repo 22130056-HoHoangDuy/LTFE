@@ -1,11 +1,17 @@
 import React, { useState } from "react";
+import useChat from "../../hooks/useChat";
+import { useChatContext } from "../../context/ChatContext";
 
 const MessageInput: React.FC = () => {
     const [value, setValue] = useState("");
+    const { sendChat } = useChat();
+    const { currentChat } = useChatContext();
 
     const handleSend = () => {
         if (!value.trim()) return;
-        // TODO: gửi tin nhắn ở đây
+        if (!currentChat) return;
+
+        sendChat(value.trim());
         setValue("");
     };
 
@@ -22,7 +28,12 @@ const MessageInput: React.FC = () => {
                 type="text"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={
+                    currentChat
+                        ? "Type your message..."
+                        : "Chọn room hoặc người để chat"
+                }
+                disabled={!currentChat}
                 style={{
                     flex: 1,
                     padding: 10,
@@ -31,6 +42,7 @@ const MessageInput: React.FC = () => {
                     marginRight: 10,
                     background: "#1E1E1E",
                     color: "#fff",
+                    opacity: currentChat ? 1 : 0.5,
                 }}
             />
             <button
@@ -40,9 +52,11 @@ const MessageInput: React.FC = () => {
                     border: "none",
                     borderRadius: 6,
                     padding: "10px 16px",
-                    cursor: "pointer",
+                    cursor: currentChat ? "pointer" : "not-allowed",
+                    opacity: currentChat ? 1 : 0.6,
                 }}
                 onClick={handleSend}
+                disabled={!currentChat}
             >
                 Gửi
             </button>
