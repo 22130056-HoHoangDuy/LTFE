@@ -1,10 +1,13 @@
 import AuthPage from "../components/Auth/AuthPage";
+import useAuth from "../hooks/useAuth";
 import { User } from "../utils/types";
 
-type Props = {
-    onLogin: (user: User) => void;
-};
+export default function LoginPage() {
+    const { login } = useAuth();
 
-export default function LoginPage({ onLogin }: Props) {
-    return <AuthPage onAuthSuccess={onLogin} />;
+    const handleLoginSuccess = (user: User) => {
+        login(user);
+    };
+
+    return <AuthPage onAuthSuccess={handleLoginSuccess} />;
 }
