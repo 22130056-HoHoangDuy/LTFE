@@ -1,5 +1,6 @@
 import React from "react";
 import { chatDashboardColors as c } from "./dashboardStyles";
+import RoomList from "../Room/RoomList";
 
 interface User {
     name: string;
@@ -12,11 +13,11 @@ interface Props {
     selectedRoom: string | null;
 }
 
-const roomListMock = Array.from({ length: 5 }, (_, i) => ({
-    id: `room${i + 1}`,
-    name: "User name",
-    time: "10:03",
-}));
+// const roomListMock = Array.from({ length: 5 }, (_, i) => ({
+//     id: `room${i + 1}`,
+//     name: "User name",
+//     time: "10:03",
+// }));
 
 const ChatSidebar: React.FC<Props> = ({
                                           user,
@@ -71,27 +72,33 @@ const ChatSidebar: React.FC<Props> = ({
             {/* Danh sách phòng/chat */}
             <div style={{ overflowY: "auto", flex: 1 }}>
                 {/* Chỗ này để xử lý gọi list room */}
-                {roomListMock.map(room => (
-                    <div
-                        key={room.id}
-                        onClick={() => onSelectRoom(room.id)}
-                        style={{
-                            borderRadius: 7,
-                            padding: "10px 8px",
-                            background: selectedRoom === room.id ? "#244D3D" : c.roomBg,
-                            color: "#fff",
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 6,
-                            cursor: "pointer",
-                            border: selectedRoom === room.id ? "2px solid #1DB954" : "2px solid transparent"
-                        }}
-                    >
-                        <img src="/icons/avatar.svg" alt="" width={31} height={31} style={{ borderRadius: "50%" }} />
-                        <span style={{ marginLeft: 14, fontWeight: 500 }}>{room.name}</span>
-                        <span style={{ marginLeft: "auto", marginRight: 6, fontSize: "0.95em", color: "#b0b0b0" }}>{room.time}</span>
-                    </div>
-                ))}
+                {/*{roomListMock.map(room => (*/}
+                {/*    <div*/}
+                {/*        key={room.id}*/}
+                {/*        onClick={() => onSelectRoom(room.id)}*/}
+                {/*        style={{*/}
+                {/*            borderRadius: 7,*/}
+                {/*            padding: "10px 8px",*/}
+                {/*            background: selectedRoom === room.id ? "#244D3D" : c.roomBg,*/}
+                {/*            color: "#fff",*/}
+                {/*            display: "flex",*/}
+                {/*            alignItems: "center",*/}
+                {/*            marginBottom: 6,*/}
+                {/*            cursor: "pointer",*/}
+                {/*            border: selectedRoom === room.id ? "2px solid #1DB954" : "2px solid transparent"*/}
+                {/*        }}*/}
+                {/*    >*/}
+                {/*        <img src="/icons/avatar.svg" alt="" width={31} height={31} style={{ borderRadius: "50%" }} />*/}
+                {/*        <span style={{ marginLeft: 14, fontWeight: 500 }}>{room.name}</span>*/}
+                {/*        <span style={{ marginLeft: "auto", marginRight: 6, fontSize: "0.95em", color: "#b0b0b0" }}>{room.time}</span>*/}
+                {/*    </div>*/}
+                {/*))}*/}
+                <RoomList rooms={[]}                    // Chỗ này truyền props thật sau (ví dụ: rooms, selectedRoomId, onSelectRoom...)
+                    // Chỗ này truyền props thật sau (ví dụ: rooms, selectedRoomId, onSelectRoom...)
+                    // rooms={...}
+                    // selectedRoomId={selectedRoom}
+                    // onSelectRoom={onSelectRoom}
+                />
             </div>
         </div>
     );
