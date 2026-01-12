@@ -1,11 +1,24 @@
+import { useEffect } from "react";
+import { User } from "../utils/types";
 import ChatLayout from "../components/Chat/ChatLayout";
-import useAuth from "../hooks/useAuth";
+import useChat from "../hooks/useChat";
 
-export default function ChatPage() {
-    const { user } = useAuth();
+type Props = {
+    user: User;
+};
 
-    // guard an toàn, tránh render khi chưa có user
-    if (!user) return null;
+export default function ChatPage({ user }: Props) {
+    const chat = useChat();
 
-    return <ChatLayout />;
+    useEffect(() => {
+        // đổi email này thành user bạn đang test
+        chat.selectChat("people", "22130074@st.hcmuaf.edu.vn");
+    }, []);
+    return (
+        <ChatLayout
+            messages={chat.messages}
+            onSend={chat.sendMessage}
+            myUsername={user.username}
+        />
+    );
 }
