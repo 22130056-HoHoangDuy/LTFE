@@ -1,120 +1,141 @@
-import { useEffect } from "react";
-import useSocket from "./useSocket";
-import { useChatContext } from "../context/ChatContext";
-import { SOCKET_ACTIONS, CHAT_EVENTS } from "../utils/constants";
+import { useCallback, useEffect, useState } from "react";
+import socket from "../api/socket";
+import { SocketMessage } from "../utils/types";
+
+/**
+ * Kiểu chat hiện tại
+ */
+type ChatTarget =
+    | { type: "room"; target: string }
+    | { type: "people"; target: string }
+    | null;
+
+/**
+ * Message chuẩn để render
+ */
+export type ChatMessage = {
+    from: string;
+    mes: string;
+    time?: string;
+};
 
 export default function useChat() {
-    const { send, messages: socketMessages } = useSocket<any>();
-    const {
-        addMessage,
-        setRooms,
-        setUsers,
-        currentChat,
-    } = useChatContext();
+    const [currentChat, setCurrentChat] = useState<ChatTarget>(null);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-    // handle socket response
+    /* =========================
+        SOCKET RECEIVE
+    ========================== */
     useEffect(() => {
-        if (!socketMessages.length) return;
+        socket.connect();
 
-        const msg = socketMessages[socketMessages.length - 1];
-        if (msg.action !== SOCKET_ACTIONS.ON_CHAT) return;
+        const unsubscribe = socket.onMessage((msg: SocketMessage & any) => {
+            console.log("SOCKET RECEIVE:", msg);
 
-        const { event, data } = msg.data || {};
+            const { event, data, status } = msg;
 
-        switch (event) {
-            case CHAT_EVENTS.GET_ROOM_MESSAGES:
-            case CHAT_EVENTS.GET_PEOPLE_MESSAGES:
-                data.forEach((m: any) => addMessage(m));
-                break;
+            // ❌ BE trả error → không xử lý messages
+            if (status === "error") {
+                console.warn("CHAT ERROR:", msg.mes);
+                return;
+            }
 
-            case CHAT_EVENTS.SEND_CHAT:
-                addMessage(data);
-                break;
+            switch (event) {
+                // ⚠️ LƯU Ý: BE dùng MES, KHÔNG phải MESS
+                case "GET_ROOM_CHAT_MESS":
+                case "GET_PEOPLE_CHAT_MES":
+                    if (Array.isArray(data)) {
+                        setMessages(
+                            data.map((m: any) => ({
+                                from: m.from || m.user || "",
+                                mes: m.mes || m.message || "",
+                                time: m.time,
+                            }))
+                        );
+                    }
+                    break;
 
-            case CHAT_EVENTS.GET_USER_LIST:
-                setUsers(data);
-                break;
-
-            case CHAT_EVENTS.CREATE_ROOM:
-            case CHAT_EVENTS.JOIN_ROOM:
-                // BE thường trả room list mới
-                if (Array.isArray(data)) setRooms(data);
-                break;
-
-            default:
-                break;
-        }
-    }, [socketMessages]);
-
-    // ===== ACTIONS =====
-
-    const createRoom = (name: string) => {
-        send({
-            action: SOCKET_ACTIONS.ON_CHAT,
-            data: {
-                event: CHAT_EVENTS.CREATE_ROOM,
-                data: { name },
-            },
+                default:
+                    break;
+            }
         });
-    };
 
-    const joinRoom = (name: string) => {
-        send({
-            action: SOCKET_ACTIONS.ON_CHAT,
-            data: {
-                event: CHAT_EVENTS.JOIN_ROOM,
-                data: { name },
-            },
-        });
-    };
+        return unsubscribe;
+    }, []);
 
-    const loadMessages = () => {
+    /* =========================
+        LOAD MESSAGE HISTORY
+    ========================== */
+    const loadMessages = useCallback(() => {
         if (!currentChat) return;
 
-        send({
-            action: SOCKET_ACTIONS.ON_CHAT,
-            data: {
-                event:
-                    currentChat.type === "room"
-                        ? CHAT_EVENTS.GET_ROOM_MESSAGES
-                        : CHAT_EVENTS.GET_PEOPLE_MESSAGES,
+        if (currentChat.type === "room") {
+            socket.send({
+                action: "onchat",
                 data: {
-                    name: currentChat.target,
+                    event: "GET_ROOM_CHAT_MESS",
+                    data: {
+                        name: currentChat.target,
+                    },
                 },
-            },
-        });
+            });
+        }
+
+        if (currentChat.type === "people") {
+            socket.send({
+                action: "onchat",
+                data: {
+                    // ⚠️ MES (đúng theo BE)
+                    event: "GET_PEOPLE_CHAT_MES",
+                    data: {
+                        user: currentChat.target,
+                    },
+                },
+            });
+        }
+    }, [currentChat]);
+
+    /* =========================
+        SELECT CHAT
+    ========================== */
+    const selectChat = (type: "room" | "people", target: string) => {
+        setCurrentChat({ type, target });
+        setMessages([]);
+
+        // Load ngay khi chọn chat
+        setTimeout(() => {
+            loadMessages();
+        }, 100);
     };
 
-    const sendChat = (mes: string) => {
-        if (!currentChat) return;
+    const sendMessage = (mes: string) => {
+        if (!currentChat || !mes.trim()) return;
 
-        send({
-            action: SOCKET_ACTIONS.ON_CHAT,
+        socket.send({
+            action: "onchat",
             data: {
-                event: CHAT_EVENTS.SEND_CHAT,
+                event: "SEND_CHAT",
                 data: {
-                    type: currentChat.type,
-                    to: currentChat.target,
+                    type: currentChat.type,   // "people" | "room"
+                    to: currentChat.target,   // username hoặc room name
                     mes,
                 },
             },
         });
+
+        // BE không push realtime → phải pull lại
+        setTimeout(() => {
+            loadMessages();
+        }, 200);
     };
 
-    const getUserList = () => {
-        send({
-            action: SOCKET_ACTIONS.ON_CHAT,
-            data: {
-                event: CHAT_EVENTS.GET_USER_LIST,
-            },
-        });
-    };
+    console.log("CHAT STATE messages:", messages);
 
     return {
-        createRoom,
-        joinRoom,
-        loadMessages,
-        sendChat,
-        getUserList,
+        currentChat,
+        messages,
+        selectChat,
+        sendMessage,
+        reloadMessages: loadMessages,
     };
 }

@@ -1,12 +1,16 @@
 import React from "react";
-import MessageItem, { Message } from "./MessageItem";
-import { useChatContext } from "../../context/ChatContext";
-import useAuth from "../../hooks/useAuth";
+import MessageItem from "./MessageItem";
+import { ChatMessage } from "../../hooks/useChat";
 
-const MessageList: React.FC = () => {
-    const { messages } = useChatContext();
-    const { user } = useAuth();
+type Props = {
+    messages: ChatMessage[];
+    myUsername: string;
+};
 
+const MessageList: React.FC<Props> = ({
+                                          messages,
+                                          myUsername,
+                                      }) => {
     return (
         <div
             style={{
@@ -24,8 +28,8 @@ const MessageList: React.FC = () => {
                     key={idx}
                     message={{
                         text: msg.mes,
-                        timestamp: "", // có thể format sau
-                        isUser: msg.from === user?.username,
+                        timestamp: msg.time ?? "", // ✅ FIX
+                        isUser: msg.from === myUsername,
                     }}
                 />
             ))}
