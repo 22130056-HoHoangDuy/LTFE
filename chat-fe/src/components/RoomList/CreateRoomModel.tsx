@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import socket from "../../api/socket";
 
-const CreateRoomModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-    const [name, setName] = useState("");
+interface Props {
+    onClose: () => void;
+    onCreate: (name: string) => void;
+}
 
-    const handleCreate = () => {
-        socket.send({
-            action: "onchat",
-            data: {
-                event: "CREATE_ROOM",
-                data: { name }
-            }
-        });
+const CreateRoomModal: React.FC<Props> = ({ onClose, onCreate }) => {
+    const [roomName, setRoomName] = useState("");
+
+    const handleSubmit = () => {
+        if (!roomName.trim()) return;
+        onCreate(roomName.trim());
+        setRoomName("");
         onClose();
     };
 
@@ -20,22 +20,64 @@ const CreateRoomModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             style={{
                 position: "fixed",
                 inset: 0,
-                background: "rgba(0,0,0,0.6)",
+                background: "rgba(0,0,0,0.3)",
                 display: "flex",
+                justifyContent: "center",
                 alignItems: "center",
-                justifyContent: "center"
             }}
         >
-            <div style={{ background: "#222", padding: 20, borderRadius: 8 }}>
-                <h3>Create Room</h3>
+            <div
+                style={{
+                    background: "#fff",
+                    padding: 20,
+                    width: 300,
+                    borderRadius: 6,
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+            >
+                <h4 style={{ margin: "0 0 10px 0" }}>Tạo phòng mới</h4>
+
                 <input
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Room name"
+                    type="text"
+                    placeholder="Tên phòng"
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
+                    style={{
+                        width: "100%",
+                        padding: 6,
+                        marginBottom: 12,
+                        borderRadius: 4,
+                        border: "1px solid #ccc",
+                    }}
                 />
-                <div style={{ marginTop: 10 }}>
-                    <button onClick={handleCreate}>Create</button>
-                    <button onClick={onClose}>Cancel</button>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                    <button
+                        onClick={handleSubmit}
+                        style={{
+                            background: "#1DB954",
+                            color: "#fff",
+                            border: "none",
+                            padding: "6px 12px",
+                            borderRadius: 4,
+                            cursor: "pointer",
+                        }}
+                    >
+                        Tạo
+                    </button>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            background: "#ccc",
+                            border: "none",
+                            padding: "6px 12px",
+                            borderRadius: 4,
+                            cursor: "pointer",
+                        }}
+                    >
+                        Hủy
+                    </button>
                 </div>
             </div>
         </div>

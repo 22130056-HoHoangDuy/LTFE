@@ -1,17 +1,40 @@
 import React from "react";
 
-const RoomItem: React.FC<{ name: string }> = ({ name }) => (
-    <div
-        style={{
-            padding: 10,
-            borderRadius: 6,
-            background: "#2A2A2A",
-            marginBottom: 8,
-            cursor: "pointer"
-        }}
-    >
-        {name}
-    </div>
-);
+interface Props {
+    room: { name: string };
+    onJoin: (name: string) => void;
+}
+
+const RoomItem: React.FC<Props> = ({ room, onJoin }) => {
+    return (
+        <div
+            style={{
+                padding: 8,
+                marginTop: 8,
+                border: "1px solid #333",
+                borderRadius: 4,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer",
+            }}
+        >
+            <span>{room.name}</span>
+            <button
+                onClick={() => onJoin(room.name)}
+                style={{
+                    background: "#1DB954",
+                    color: "#fff",
+                    border: "none",
+                    padding: "4px 10px",
+                    borderRadius: 4,
+                    cursor: "pointer",
+                }}
+            >
+                Join
+            </button>
+        </div>
+    );
+};
 
 export default RoomItem;
