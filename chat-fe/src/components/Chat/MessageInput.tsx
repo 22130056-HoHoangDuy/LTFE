@@ -47,7 +47,7 @@ const MessageInput: React.FC = () => {
             />
             <button
                 style={{
-                    background: "#1DB954",
+                    background: "#2196f3",
                     color: "#fff",
                     border: "none",
                     borderRadius: 6,
