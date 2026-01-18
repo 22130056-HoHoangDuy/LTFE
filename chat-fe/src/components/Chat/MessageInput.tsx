@@ -1,65 +1,43 @@
 import React, { useState } from "react";
-import useChat from "../../hooks/useChat";
-import { useChatContext } from "../../context/ChatContext";
 
-const MessageInput: React.FC = () => {
-    const [value, setValue] = useState("");
-    const { sendChat } = useChat();
-    const { currentChat } = useChatContext();
+type Props = {
+    onSend: (mes: string) => void;
+};
+
+const MessageInput: React.FC<Props> = ({ onSend }) => {
+    const [text, setText] = useState("");
 
     const handleSend = () => {
-        if (!value.trim()) return;
-        if (!currentChat) return;
-
-        sendChat(value.trim());
-        setValue("");
+        if (!text.trim()) return;
+        onSend(text);
+        setText("");
     };
 
     return (
         <div
             style={{
+                padding: 12,
+                borderTop: "1px solid #222",
                 display: "flex",
-                alignItems: "center",
-                padding: 10,
-                background: "#1E1E1E",
+                gap: 10,
             }}
         >
             <input
-                type="text"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder={
-                    currentChat
-                        ? "Type your message..."
-                        : "Nhập tin nhắn của bạn..."
-                }
-                disabled={!currentChat}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder="Nhập tin nhắn..."
                 style={{
                     flex: 1,
-                    padding: 10,
+                    background: "#1e1e1e",
+                    color: "#fff",
                     border: "none",
                     borderRadius: 6,
-                    marginRight: 10,
-                    background: "#1E1E1E",
-                    color: "#fff",
-                    opacity: currentChat ? 1 : 0.5,
+                    padding: "8px 12px",
+                    outline: "none",
                 }}
             />
-            <button
-                style={{
-                    background: "#1DB954",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 6,
-                    padding: "10px 16px",
-                    cursor: currentChat ? "pointer" : "not-allowed",
-                    opacity: currentChat ? 1 : 0.6,
-                }}
-                onClick={handleSend}
-                disabled={!currentChat}
-            >
-                Gửi
-            </button>
+            <button onClick={handleSend}>Gửi</button>
         </div>
     );
 };

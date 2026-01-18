@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useState } from "react";
-import { User } from "../utils/types";
+import { createContext, useContext, useState } from "react";
+
+export type User = {
+    username: string;
+};
 
 type AuthContextType = {
     user: User | null;
@@ -8,18 +11,13 @@ type AuthContextType = {
     logout: () => void;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
 
-    const login = (userData: User) => {
-        setUser(userData);
-    };
-
-    const logout = () => {
-        setUser(null);
-    };
+    const login = (u: User) => setUser(u);
+    const logout = () => setUser(null);
 
     return (
         <AuthContext.Provider
@@ -37,8 +35,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuthContext = () => {
     const ctx = useContext(AuthContext);
-    if (!ctx) {
-        throw new Error("useAuthContext must be used inside AuthProvider");
-    }
+    if (!ctx) throw new Error("useAuthContext must be used inside AuthProvider");
     return ctx;
 };
