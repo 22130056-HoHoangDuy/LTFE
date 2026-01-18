@@ -5,17 +5,51 @@ interface User {
     username: string;
     avatar: string;
 }
+
 interface Props {
-    user: User;
-    onClickAvatar: () => void;
-    onClickSetting: () => void;
+    user: User,
+    onClickAvatar: () => void,
+    onClickSetting: () => void,
+    showAccountDialog: boolean,
+    showSettingDialog: boolean,
+
 }
+
+// Styles cho hiệu ứng hover icon
+const iconBoxStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 42,
+    height: 42,
+    borderRadius: "50%",
+    background: "transparent",
+    transition: "background 0.25s, box-shadow 0.25s, filter 0.22s, transform 0.22s",
+    cursor: "pointer"
+};
+const iconBoxHoverStyle: React.CSSProperties = {
+    background: "#2d3a46",
+    boxShadow: "0 2px 8px #0003",
+    filter: "brightness(1.18)",
+    transform: "scale(1.12) translateX(8px)",
+};
 
 const SidebarIcon: React.FC<Props> = ({
                                           user,
                                           onClickAvatar,
                                           onClickSetting,
+                                          showAccountDialog,
+                                          showSettingDialog
                                       }) => {
+    // State chỉ cần cho avatar, các icon còn lại dùng CSS group hover bằng sự kiện onMouseEnter/Leave
+    const [hoverIdx, setHoverIdx] = React.useState<number | null>(null);
+
+    // Xác định src cho icon thường và icon hover
+    const avatarSrc = hoverIdx === 0 ? user.avatar.replace('.svg', '1.svg') : user.avatar;
+    const chatSrc = hoverIdx === 1 ? "/icons/chat1.svg" : "/icons/chat.svg";
+    const roomSrc = hoverIdx === 2 ? "/icons/contact1.svg" : "/icons/contact.svg";
+    const settingSrc = hoverIdx === 3 ? "/icons/setting1.svg" : "/icons/setting.svg";
+
     return (
         <div
             style={{
@@ -33,38 +67,69 @@ const SidebarIcon: React.FC<Props> = ({
             <div
                 onClick={onClickAvatar}
                 style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: "50%",
+                    ...iconBoxStyle,
                     background: "#444",
                     marginBottom: 28,
-                    cursor: "pointer",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    display: "flex"
+                    ...((hoverIdx === 0 || showAccountDialog) ? iconBoxHoverStyle : {})
                 }}
+                onMouseEnter={() => setHoverIdx(0)}
+                onMouseLeave={() => setHoverIdx(null)}
                 title={user.name}
             >
-                <img src={user.avatar} width={30} height={30} alt="" />
+                <img src={avatarSrc} width={30} height={30} alt=""/>
             </div>
             {/* Icon chat */}
-            <div style={{ marginBottom: 18, cursor: "pointer" }}>
-                <img src="/icons/chat.svg" width={28} alt="icon-chat" />
+            <div
+                style={{
+                    marginBottom: 18,
+                }}
+                onMouseEnter={() => setHoverIdx(1)}
+                onMouseLeave={() => setHoverIdx(null)}
+            >
+                <div
+                    style={{
+                        ...iconBoxStyle,
+                        ...(hoverIdx === 1 ? iconBoxHoverStyle : {})
+                    }}
+                >
+                    <img src={chatSrc} width={28} alt="icon-chat"/>
+                </div>
             </div>
             {/* Icon room */}
-            <div style={{ marginBottom: 18, cursor: "pointer" }}>
-                <img src="/icons/contact.svg" width={28} alt="icon-contact" />
+            <div
+                style={{
+                    marginBottom: 18,
+                }}
+                onMouseEnter={() => setHoverIdx(2)}
+                onMouseLeave={() => setHoverIdx(null)}
+            >
+                <div
+                    style={{
+                        ...iconBoxStyle,
+                        ...(hoverIdx === 2 ? iconBoxHoverStyle : {})
+                    }}
+                >
+                    <img src={roomSrc} width={28} alt="icon-contact"/>
+                </div>
             </div>
             {/* Icon setting */}
             <div
                 style={{
                     marginTop: "auto",
                     marginBottom: 16,
-                    cursor: "pointer"
                 }}
+                onMouseEnter={() => setHoverIdx(3)}
+                onMouseLeave={() => setHoverIdx(null)}
                 onClick={onClickSetting}
             >
-                <img src="/icons/setting.svg" width={28} alt="icon-setting" />
+                <div
+                    style={{
+                        ...iconBoxStyle,
+                        ...((hoverIdx === 3 || showSettingDialog) ? iconBoxHoverStyle : {})
+                    }}
+                >
+                    <img src={settingSrc} width={28} alt="icon-setting"/>
+                </div>
             </div>
         </div>
     );
