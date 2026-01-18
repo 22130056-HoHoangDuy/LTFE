@@ -37,7 +37,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                     position: "relative"
                 }}
             >
-                <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 16 }}>
+                <div style={{fontWeight: 600, fontSize: 20, marginBottom: 16}}>
                     Tạo phòng mới
                 </div>
                 {/* Chỗ này để form nhập tên phòng, chọn người tham gia... */}
@@ -56,7 +56,8 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                     }}
                     onClick={onClose}
                     aria-label="Đóng"
-                >×</button>
+                >×
+                </button>
             </div>
         </div>
     );

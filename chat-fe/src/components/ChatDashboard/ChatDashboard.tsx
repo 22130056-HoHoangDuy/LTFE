@@ -20,9 +20,12 @@ const ChatDashboard: React.FC = () => {
     return (
         <div style={{
             height: "100vh",
+            width: "100vw",
             background: "#121212",
             display: "flex",
-            flexDirection: "column"
+            flexDirection: "column",
+            overflow: "hidden",
+            position: "relative"
         }}>
             {/* HEADER - ngang trên cùng */}
             <div style={{
