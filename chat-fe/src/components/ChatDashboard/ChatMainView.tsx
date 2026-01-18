@@ -10,13 +10,17 @@ interface Props {
         username: string;
         avatar: string;
     };
+    theme: "dark" | "light";
 }
 
-const ChatMainView: React.FC<Props> = ({selectedRoom, user}) => {
+const ChatMainView: React.FC<Props> = ({ selectedRoom, user, theme }) => {
+    // Đổi màu text theo theme
+    const textColor = theme === "dark" ? "#fff" : "#222";
+
     // Nếu chưa chọn phòng thì render background
     if (!selectedRoom) {
         return (
-            <div style={{position: "relative", width: "100%", height: "100%"}}>
+            <div style={{ position: "relative", width: "100%", height: "100%" }}>
                 {/* Aurora background */}
                 <Aurora
                     colorStops={["#3A29FF", "#19C1E7", "#10A478"]}
@@ -32,7 +36,7 @@ const ChatMainView: React.FC<Props> = ({selectedRoom, user}) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "#fff",
+                        color: textColor,
                         fontSize: 22,
                         fontWeight: 600,
                         pointerEvents: "none"
@@ -44,7 +48,7 @@ const ChatMainView: React.FC<Props> = ({selectedRoom, user}) => {
         );
     }
     return (
-        <div style={{flex: 1}}>
+        <div style={{ flex: 1, color: textColor }}>
             {/* Chỗ này để render chatbox của phòng đã chọn */}
             {/*<ChatLayout roomId={selectedRoom} user={user}*/}
             /* Chỗ này để xử lý load & hiển thị nội dung phòng chat */
