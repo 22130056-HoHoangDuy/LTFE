@@ -1,20 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
 import socket from "./api/socket";
-import { User } from "./utils/types";
+import { AuthProvider, useAuthContext } from "./context/AuthContext";
+import { ChatProvider } from "./context/ChatContext";
+import ChatDashboard from "./components/ChatDashboard/ChatDashboard";
+
+function AppContent() {
+    const { isAuthenticated } = useAuthContext();
+
+    if (!isAuthenticated) {
+        //return <LoginPage />;
+        return <ChatDashboard />;
+    }
+
+    return <ChatPage />;
+}
 
 export default function App() {
-    const [user, setUser] = useState<User | null>(null);
-
     useEffect(() => {
         socket.connect();
     }, []);
 
-    if (!user) {
-        return <LoginPage onLogin={setUser} />;
-    }
-
-    // 🔥 TRUYỀN USER XUỐNG
-    return <ChatPage user={user} />;
+    return (
+        <AuthProvider>
+            <ChatProvider>
+                <AppContent />
+            </ChatProvider>
+        </AuthProvider>
+    );
 }

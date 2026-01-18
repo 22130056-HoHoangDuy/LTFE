@@ -1,15 +1,17 @@
 import React, { useState } from "react";
+import useChat from "../../hooks/useChat";
+import { useChatContext } from "../../context/ChatContext";
 
-type Props = {
-    onSend: (mes: string) => void;
-};
-
-const MessageInput: React.FC<Props> = ({ onSend }) => {
+const MessageInput: React.FC = () => {
     const [value, setValue] = useState("");
+    const { sendChat } = useChat();
+    const { currentChat } = useChatContext();
 
     const handleSend = () => {
         if (!value.trim()) return;
-        onSend(value);
+        if (!currentChat) return;
+
+        sendChat(value.trim());
         setValue("");
     };
 
@@ -26,7 +28,12 @@ const MessageInput: React.FC<Props> = ({ onSend }) => {
                 type="text"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={
+                    currentChat
+                        ? "Type your message..."
+                        : "Nhập tin nhắn của bạn..."
+                }
+                disabled={!currentChat}
                 style={{
                     flex: 1,
                     padding: 10,
@@ -35,18 +42,21 @@ const MessageInput: React.FC<Props> = ({ onSend }) => {
                     marginRight: 10,
                     background: "#1E1E1E",
                     color: "#fff",
+                    opacity: currentChat ? 1 : 0.5,
                 }}
             />
             <button
-                onClick={handleSend}
                 style={{
                     background: "#1DB954",
                     color: "#fff",
                     border: "none",
                     borderRadius: 6,
                     padding: "10px 16px",
-                    cursor: "pointer",
+                    cursor: currentChat ? "pointer" : "not-allowed",
+                    opacity: currentChat ? 1 : 0.6,
                 }}
+                onClick={handleSend}
+                disabled={!currentChat}
             >
                 Gửi
             </button>
