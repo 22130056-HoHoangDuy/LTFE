@@ -1,3 +1,4 @@
+// ChatSidebar.tsx
 import React, { useState } from "react";
 import { chatDashboardColors as c } from "./dashboardStyles";
 import RoomList from "../Room/RoomList";
@@ -11,6 +12,7 @@ interface Props {
     user: User;
     onSelectRoom: (roomId: string) => void;
     selectedRoom: string | null;
+    theme: "dark" | "light";
 }
 
 // const roomListMock = Array.from({ length: 5 }, (_, i) => ({
@@ -23,6 +25,7 @@ const ChatSidebar: React.FC<Props> = ({
                                           user,
                                           onSelectRoom,
                                           selectedRoom,
+                                          theme,
                                       }) => {
     // State hover cho search icon và nút Tạo phòng
     const [hoverSearch, setHoverSearch] = useState(false);
@@ -30,16 +33,28 @@ const ChatSidebar: React.FC<Props> = ({
     // State để track focus input tìm kiếm
     const [searchFocus, setSearchFocus] = useState(false);
 
+    // Đổi màu theo theme
+    const sidebarBg = theme === "dark" ? c.bgSidebar : "#f3f5f7";
+    const sidebarText = theme === "dark" ? c.text : "#222";
+    const sidebarBorder = theme === "dark" ? c.sidebarBorder : "#222";
+    const inputBg = theme === "dark" ? c.input : "#fff";
+    const inputText = theme === "dark" ? c.inputText : "#222";
+    const buttonText = theme === "dark" ? "#fff" : "#222";
+    const buttonBorder = theme === "dark" ? "#fff" : "#222";
+    const buttonBgHover = theme === "dark" ? "#2196f3" : "#2196f3";
+    const searchBorderFocus = theme === "dark" ? "#fff" : "#222";
+    const placeholderColor = theme === "dark" ? "#aaa" : "#222";
+
     return (
         <div
             style={{
                 width: 260,
-                background: c.bgSidebar,
-                color: c.text,
+                background: sidebarBg,
+                color: sidebarText,
                 display: "flex",
                 flexDirection: "column",
                 padding: "0 18px",
-                borderRight: `2px solid ${c.sidebarBorder}`,
+                borderRight: `2px solid ${sidebarBorder}`,
                 minWidth: 0,
                 maxWidth: 300,
             }}
@@ -63,10 +78,10 @@ const ChatSidebar: React.FC<Props> = ({
                 />
                 <input
                     style={{
-                        background: c.input,
-                        color: c.inputText,
+                        background: inputBg,
+                        color: inputText,
                         borderRadius: 28,
-                        border: searchFocus ? "2px solid #fff" : "none",
+                        border: searchFocus ? `2px solid ${searchBorderFocus}` : "none",
                         padding: "7px 15px",
                         outline: "none",
                         flex: 1,
@@ -75,16 +90,38 @@ const ChatSidebar: React.FC<Props> = ({
                     placeholder="Tìm kiếm"
                     onFocus={() => setSearchFocus(true)}
                     onBlur={() => setSearchFocus(false)}
-                    // Chỗ này để xử lý tìm kiếm room
+
+                    // @ts-ignore
+                    style={
+                        {
+                            background: inputBg,
+                            color: inputText,
+                            borderRadius: 28,
+                            border: searchFocus ? `2px solid ${searchBorderFocus}` : "none",
+                            padding: "7px 15px",
+                            outline: "none",
+                            flex: 1,
+                            transition: "border 0.16s",
+                            '::placeholder': { color: placeholderColor, opacity: 1 }
+                        } as React.CSSProperties
+                    }
                 />
+                <style>
+                    {`
+                input::placeholder {
+                  color: ${placeholderColor};
+                  opacity: 1;
+                }
+                `}
+                </style>
             </div>
             {/* Nút Tạo phòng */}
             <button style={{
                 marginBottom: 15,
-                border: `2px solid ${hoverCreate ? "#2196f3" : "#fff"}`,
-                background: hoverCreate ? "#2196f3" : "transparent",
+                border: `2px solid ${hoverCreate ? buttonBgHover : buttonBorder}`,
+                background: hoverCreate ? buttonBgHover : "transparent",
                 borderRadius: 6,
-                color: "#fff",
+                color: buttonText,
                 padding: "6px 22px",
                 fontWeight: 450,
                 cursor: "pointer",
@@ -98,34 +135,7 @@ const ChatSidebar: React.FC<Props> = ({
             </button>
             {/* Danh sách phòng/chat */}
             <div style={{ overflowY: "auto", flex: 1 }}>
-                {/* Chỗ này để xử lý gọi list room */}
-                {/*{roomListMock.map(room => (
-                    <div
-                        key={room.id}
-                        onClick={() => onSelectRoom(room.id)}
-                        style={{
-                            borderRadius: 7,
-                            padding: "10px 8px",
-                            background: selectedRoom === room.id ? "#244D3D" : c.roomBg,
-                            color: "#fff",
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 6,
-                            cursor: "pointer",
-                            border: selectedRoom === room.id ? "2px solid #1DB954" : "2px solid transparent"
-                        }}
-                    >
-                        <img src="/icons/avatar.svg" alt="" width={31} height={31} style={{ borderRadius: "50%" }} />
-                        <span style={{ marginLeft: 14, fontWeight: 500 }}>{room.name}</span>
-                        <span style={{ marginLeft: "auto", marginRight: 6, fontSize: "0.95em", color: "#b0b0b0" }}>{room.time}</span>
-                    </div>
-                ))}*/}
-                <RoomList rooms={[]}                    // Chỗ này truyền props thật sau (ví dụ: rooms, selectedRoomId, onSelectRoom...)
-                    // Chỗ này truyền props thật sau (ví dụ: rooms, selectedRoomId, onSelectRoom...)
-                    // rooms={...}
-                    // selectedRoomId={selectedRoom}
-                    // onSelectRoom={onSelectRoom}
-                />
+                <RoomList rooms={[]} />
             </div>
         </div>
     );

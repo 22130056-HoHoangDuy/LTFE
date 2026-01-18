@@ -19,11 +19,25 @@ const ChatDashboard: React.FC = () => {
     // State cho hiệu ứng hover text popup
     const [hoverPopupIdx, setHoverPopupIdx] = useState<number | null>(null);
 
+    // --- Theme state và xử lý theme ---
+    const [theme, setTheme] = useState<"dark" | "light">("dark");
+    const toggleTheme = () => setTheme(t => (t === "dark" ? "light" : "dark"));
+
+    // Các màu nền theo theme (kết hợp biến cũ)
+    const backgroundColor = theme === "dark" ? "#121212" : "#fff";
+    const headerBg = theme === "dark" ? "#222" : "#f8f9fa";
+    const headerColor = theme === "dark" ? "#fff" : "#222";
+
+    // Popup color theo theme
+    const popupBg = theme === "dark" ? "#232323" : "#fff";
+    const popupText = theme === "dark" ? "#fff" : "#222";
+    const popupBorder = theme === "dark" ? "#aaa" : "#d6d6d6";
+
     return (
         <div style={{
             height: "100vh",
             width: "100vw",
-            background: "#121212",
+            background: backgroundColor,
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -33,18 +47,36 @@ const ChatDashboard: React.FC = () => {
             <div style={{
                 width: "100%",
                 height: 48,
-                background: "#222",
-                color: "#fff",
+                background: headerBg,
+                color: headerColor,
                 display: "flex",
                 alignItems: "center",
                 fontSize: 20,
                 fontWeight: 600,
                 paddingLeft: 35,
-                borderBottom: "2px solid #191919",
+                borderBottom: theme === "dark" ? "2px solid #191919" : "2px solid #eee",
                 letterSpacing: 0.2,
-                zIndex: 2
+                zIndex: 2,
+                position: "relative"
             }}>
                 App chat - {mockUser.name}
+                {/* ICON đổi theme */}
+                <img
+                    src={theme === "dark" ? "/icons/night.svg" : "/icons/light.svg"}
+                    alt={theme === "dark" ? "Night Mode" : "Light Mode"}
+                    width={26}
+                    height={26}
+                    style={{
+                        position: "absolute",
+                        top: "50%",
+                        right: 96,
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        transition: "filter 0.14s, transform 0.14s"
+                    }}
+                    onClick={toggleTheme}
+                    title={theme === "dark" ? "Chuyển theme sáng" : "Chuyển theme tối"}
+                />
             </div>
             {/* BODY - 3 cột dưới (icon | sidebar | main) */}
             <div style={{ display: "flex", flex: 1, minHeight: 0, minWidth: 0 }}>
@@ -55,26 +87,32 @@ const ChatDashboard: React.FC = () => {
                     onClickSetting={() => setShowSettingDialog(true)}
                     showAccountDialog={showAccountDialog}
                     showSettingDialog={showSettingDialog}
+                    theme={theme}
                 />
                 {/* Column 2: ChatSidebar */}
                 <ChatSidebar
                     user={mockUser}
                     onSelectRoom={setSelectedRoom}
                     selectedRoom={selectedRoom}
+                    theme={theme}
                 />
                 {/* Column 3: MainView */}
-                <ChatMainView selectedRoom={selectedRoom} user={mockUser} />
+                <ChatMainView selectedRoom={selectedRoom} user={mockUser} theme={theme} />
             </div>
             {/* Popup menu/setting */}
             {showAccountDialog && (
                 <div
                     style={{
                         position: "fixed", left: 65, top: 60,
-                        background: "#232323", color: "#fff", minWidth: 170,
-                        borderRadius: 10, boxShadow: "0 4px 16px #0002", zIndex: 10,
+                        background: popupBg,
+                        color: popupText,
+                        minWidth: 170,
+                        borderRadius: 10,
+                        boxShadow: "0 4px 16px #0002",
+                        zIndex: 10,
                         padding: 12
                     }}>
-                    <div style={{ borderBottom: "2px solid #aaa", paddingBottom: 6, marginBottom: 10 }}>
+                    <div style={{ borderBottom: `2px solid ${popupBorder}`, paddingBottom: 6, marginBottom: 10 }}>
                         <strong>{mockUser.name}</strong>
                     </div>
                     <div
@@ -82,6 +120,7 @@ const ChatDashboard: React.FC = () => {
                             cursor: "pointer",
                             marginBottom: 8,
                             transition: "transform 0.18s",
+                            color: popupText,
                             ...(hoverPopupIdx === 0 ? { transform: "scale(1.1) translateX(8px)" } : {})
                         }}
                         onMouseEnter={() => setHoverPopupIdx(0)}
@@ -92,6 +131,7 @@ const ChatDashboard: React.FC = () => {
                             cursor: "pointer",
                             marginBottom: 8,
                             transition: "transform 0.18s",
+                            color: popupText,
                             ...(hoverPopupIdx === 1 ? { transform: "scale(1.1) translateX(8px)" } : {})
                         }}
                         onMouseEnter={() => setHoverPopupIdx(1)}
@@ -113,7 +153,8 @@ const ChatDashboard: React.FC = () => {
                     >Đăng xuất</div>
                     <div
                         style={{
-                            position: "absolute", top: 5, right: 10, fontSize: 18, cursor: "pointer"
+                            position: "absolute", top: 5, right: 10, fontSize: 18, cursor: "pointer",
+                            color: popupText
                         }}
                         onClick={() => setShowAccountDialog(false)}
                         title="Đóng"
@@ -124,8 +165,12 @@ const ChatDashboard: React.FC = () => {
                 <div
                     style={{
                         position: "fixed", left: 65, bottom: 60,
-                        background: "#232323", color: "#fff", minWidth: 190,
-                        borderRadius: 10, boxShadow: "0 4px 16px #0002", zIndex: 10,
+                        background: popupBg,
+                        color: popupText,
+                        minWidth: 190,
+                        borderRadius: 10,
+                        boxShadow: "0 4px 16px #0002",
+                        zIndex: 10,
                         padding: 12
                     }}>
                     <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
@@ -139,6 +184,7 @@ const ChatDashboard: React.FC = () => {
                             marginBottom: 10,
                             cursor: "pointer",
                             transition: "transform 0.18s",
+                            color: popupText,
                             ...(hoverPopupIdx === 10 ? { transform: "scale(1.1) translateX(8px)" } : {})
                         }}
                         onMouseEnter={() => setHoverPopupIdx(10)}
@@ -154,6 +200,7 @@ const ChatDashboard: React.FC = () => {
                             marginBottom: 10,
                             cursor: "pointer",
                             transition: "transform 0.18s",
+                            color: popupText,
                             ...(hoverPopupIdx === 11 ? { transform: "scale(1.1) translateX(8px)" } : {})
                         }}
                         onMouseEnter={() => setHoverPopupIdx(11)}
@@ -169,6 +216,7 @@ const ChatDashboard: React.FC = () => {
                             marginBottom: 10,
                             cursor: "pointer",
                             transition: "transform 0.18s",
+                            color: popupText,
                             ...(hoverPopupIdx === 12 ? { transform: "scale(1.1) translateX(8px)" } : {})
                         }}
                         onMouseEnter={() => setHoverPopupIdx(12)}
@@ -193,7 +241,8 @@ const ChatDashboard: React.FC = () => {
                     </div>
                     <div
                         style={{
-                            position: "absolute", top: 5, right: 10, fontSize: 18, cursor: "pointer"
+                            position: "absolute", top: 5, right: 10, fontSize: 18, cursor: "pointer",
+                            color: popupText
                         }}
                         onClick={() => setShowSettingDialog(false)}
                         title="Đóng"
