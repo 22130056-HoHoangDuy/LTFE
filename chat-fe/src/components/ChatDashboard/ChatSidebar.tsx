@@ -27,6 +27,8 @@ const ChatSidebar: React.FC<Props> = ({
     // State hover cho search icon và nút Tạo phòng
     const [hoverSearch, setHoverSearch] = useState(false);
     const [hoverCreate, setHoverCreate] = useState(false);
+    // State để track focus input tìm kiếm
+    const [searchFocus, setSearchFocus] = useState(false);
 
     return (
         <div
@@ -64,12 +66,15 @@ const ChatSidebar: React.FC<Props> = ({
                         background: c.input,
                         color: c.inputText,
                         borderRadius: 28,
-                        border: "none",
+                        border: searchFocus ? "2px solid #fff" : "none",
                         padding: "7px 15px",
                         outline: "none",
                         flex: 1,
+                        transition: "border 0.16s"
                     }}
                     placeholder="Tìm kiếm"
+                    onFocus={() => setSearchFocus(true)}
+                    onBlur={() => setSearchFocus(false)}
                     // Chỗ này để xử lý tìm kiếm room
                 />
             </div>
