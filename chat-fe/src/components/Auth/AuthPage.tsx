@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/components/Auth/AuthPage.tsx
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
@@ -9,7 +10,7 @@ type Props = {
     onAuthSuccess: (user: User) => void;
 };
 
-export default function AuthPage({ onAuthSuccess }: Props) {
+const AuthPage: React.FC<Props> = ({ onAuthSuccess }) => {
     const [mode, setMode] = useState<"login" | "register">("login");
 
     return (
@@ -40,4 +41,6 @@ export default function AuthPage({ onAuthSuccess }: Props) {
             </motion.div>
         </div>
     );
-}
+};
+
+export default AuthPage;

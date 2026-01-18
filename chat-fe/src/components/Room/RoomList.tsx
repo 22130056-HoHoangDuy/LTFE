@@ -1,37 +1,71 @@
 import React from "react";
-import RoomItem from "./RoomItem";
 
-// Props: danh sách room mock, callback chọn phòng
 interface Room {
     id: string;
     name: string;
-    avatar: string;
-    lastMessageTime: string; // dạng "10:03" hoặc "3 ngày trước"
+    time?: string;
 }
-interface RoomListProps {
+
+interface Props {
     rooms: Room[];
-    selectedRoomId?: string;
-    onSelectRoom?: (roomId: string) => void;
+    selectedRoomId: string | null;
+    onSelectRoom: (roomId: string) => void;
 }
 
-const RoomList: React.FC<RoomListProps> = ({
-                                               rooms,
-                                               selectedRoomId,
-                                               onSelectRoom
-                                           }) => {
-    // Chỗ này để xử lý load danh sách room từ backend
-
+const RoomList: React.FC<Props> = ({
+                                       rooms,
+                                       selectedRoomId,
+                                       onSelectRoom,
+                                   }) => {
     return (
-        <div>
-            {rooms.map(room => (
-                <RoomItem
+        <>
+            {rooms.map((room) => (
+                <div
                     key={room.id}
-                    room={room}
-                    selected={selectedRoomId === room.id}
-                    onClick={() => onSelectRoom?.(room.id)}
-                />
+                    onClick={() => onSelectRoom(room.id)}
+                    style={{
+                        borderRadius: 7,
+                        padding: "10px 8px",
+                        background:
+                            selectedRoomId === room.id
+                                ? "#244D3D"
+                                : "#1a1a1a",
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 6,
+                        cursor: "pointer",
+                        border:
+                            selectedRoomId === room.id
+                                ? "2px solid #1DB954"
+                                : "2px solid transparent",
+                    }}
+                >
+                    <img
+                        src="/icons/avatar.svg"
+                        alt=""
+                        width={31}
+                        height={31}
+                        style={{ borderRadius: "50%" }}
+                    />
+                    <span style={{ marginLeft: 14, fontWeight: 500 }}>
+                        {room.name}
+                    </span>
+                    {room.time && (
+                        <span
+                            style={{
+                                marginLeft: "auto",
+                                marginRight: 6,
+                                fontSize: "0.9em",
+                                color: "#b0b0b0",
+                            }}
+                        >
+                            {room.time}
+                        </span>
+                    )}
+                </div>
             ))}
-        </div>
+        </>
     );
 };
 
