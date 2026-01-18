@@ -18,7 +18,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName = "Minh Hao" }) => (
     >
         <button
             style={{
-                background: "#1DB954",
+                background: "#2196f3",
                 color: "#fff",
                 border: "none",
                 borderRadius: 6,

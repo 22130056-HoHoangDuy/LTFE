@@ -4,7 +4,7 @@ const styles = {
     item: (selected: boolean) => ({
         borderRadius: 7,
         padding: "10px 8px",
-        background: selected ? "#244D3D" : "#292929",
+        background: selected ? "#0E558D" : "#292929",
         color: "#fff",
         display: "flex",
         alignItems: "center",
