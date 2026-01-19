@@ -1,0 +1,52 @@
+export const styles = {
+    container: {
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #0f172a, #020617)",
+    },
+    card: {
+        width: 380,
+        background: "#fff",
+        borderRadius: 16,
+        padding: 28,
+        boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+    },
+    title: {
+        textAlign: "center" as const,
+        fontSize: 26,
+        fontWeight: 700,
+        marginBottom: 20,
+    },
+    input: {
+        width: "100%",
+        padding: "12px 1px",
+        marginBottom: 12,
+        borderRadius: 8,
+        border: "1px solid #e5e7eb",
+        fontSize: 14,
+    },
+    button: {
+        width: "100%",
+        padding: "12px",
+        borderRadius: 8,
+        border: "none",
+        background: "#6366f1",
+        color: "#fff",
+        fontWeight: 600,
+        cursor: "pointer",
+    },
+    switch: {
+        textAlign: "center" as const,
+        marginTop: 16,
+        fontSize: 14,
+        color: "#6366f1",
+        cursor: "pointer",
+    },
+    error: {
+        color: "red",
+        fontSize: 13,
+        marginBottom: 8,
+    },
+};
