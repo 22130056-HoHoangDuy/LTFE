@@ -1,36 +1,25 @@
 import React from "react";
+import { useAuthContext } from "../../context/AuthContext";
 
-type ChatHeaderProps = {
-    roomName?: string;
-    // onBack, user, onLogout
-};
+const ChatHeader: React.FC = () => {
+    const { user } = useAuthContext();
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName = "Minh Hao" }) => (
-    <div
-        style={{
-            display: "flex",
-            alignItems: "center",
-            background: "#1E1E1E",
-            color: "#fff",
-            padding: "10px 20px",
-            borderBottom: "1px solid #333",
-        }}
-    >
-        <button
+    return (
+        <div
             style={{
-                background: "#2196f3",
+                height: 56,
+                padding: "0 20px",
+                display: "flex",
+                alignItems: "center",
+                background: "#121212",
                 color: "#fff",
-                border: "none",
-                borderRadius: 6,
-                padding: "8px 16px",
-                cursor: "pointer",
+                borderBottom: "1px solid #222",
+                fontWeight: 600,
+                fontSize: 15,
             }}
-            // onClick={() => ...}
         >
-            &lt;
-        </button>
-        <h2 style={{ margin: 0, marginLeft: 10, fontSize: "1.2rem" }}>{roomName}</h2>
-    </div>
-);
-
+            {user ? user.username : "Chat"}
+        </div>
+    );
+};
 export default ChatHeader;

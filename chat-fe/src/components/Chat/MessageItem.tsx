@@ -1,15 +1,15 @@
 import React from "react";
 
-export type Message = {
+export type MessageUI = {
     text: string;
     timestamp: string;
     avatar?: string;
     isUser: boolean;
 };
 
-type MessageItemProps = {
-    message: Message;
-};
+interface MessageItemProps {
+    message: MessageUI;
+}
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => (
     <div
@@ -25,11 +25,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => (
             <img
                 src={message.avatar || "https://via.placeholder.com/40"}
                 alt="avatar"
-                style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                }}
+                style={{ width: 40, height: 40, borderRadius: "50%" }}
             />
         )}
         <div
@@ -38,11 +34,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => (
                 color: "#fff",
                 padding: "10px 15px",
                 borderRadius: 10,
-                boxShadow: "0px 4px 6px rgba(0,0,0,0.2)",
             }}
         >
             <p style={{ margin: 0 }}>{message.text}</p>
-            <span style={{ fontSize: "0.8em", color: "#b0b0b0", marginTop: 5 }}>
+            <span style={{ fontSize: 12, color: "#b0b0b0" }}>
                 {message.timestamp}
             </span>
         </div>
