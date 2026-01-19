@@ -13,19 +13,33 @@ interface Props {
     onSelectRoom: (username: string) => void;
 }
 
-const ChatSidebar: React.FC<Props> = ({
-                                          user,
-                                          selectedRoom,
-                                          onSelectRoom,
-                                      }) => {
-    const users = useUserList();
+const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom }) => {
+    const usersRaw = useUserList();
     const [keyword, setKeyword] = useState("");
+
+    // Debug: xem cấu trúc users từ hook
+    // console.log("usersRaw:", usersRaw);
+
+    // normalize users thành { id, name }
+    const users = useMemo(() => {
+        if (!Array.isArray(usersRaw)) return [];
+        return usersRaw.map((u: any, idx: number) => {
+            if (typeof u === "string" || typeof u === "number") {
+                const id = String(u);
+                return { id, name: id };
+            }
+            if (typeof u === "object" && u !== null) {
+                const id = String(u.id ?? u.userId ?? u.username ?? idx);
+                const name = String(u.name ?? u.username ?? u.user ?? id);
+                return { id, name };
+            }
+            return { id: String(idx), name: String(u) };
+        });
+    }, [usersRaw]);
 
     const filteredUsers = useMemo(() => {
         if (!keyword.trim()) return users;
-        return users.filter((u) =>
-            u.username.toLowerCase().includes(keyword.toLowerCase())
-        );
+        return users.filter((u) => u.name.toLowerCase().includes(keyword.toLowerCase()));
     }, [users, keyword]);
 
     return (
@@ -79,8 +93,8 @@ const ChatSidebar: React.FC<Props> = ({
             <div style={{ overflowY: "auto", flex: 1 }}>
                 <RoomList
                     rooms={filteredUsers.map((u) => ({
-                        id: u.username,
-                        name: u.username,
+                        id: u.id,
+                        name: u.name,
                         time: "",
                     }))}
                     selectedRoomId={selectedRoom}

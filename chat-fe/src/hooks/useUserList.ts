@@ -1,32 +1,59 @@
+// src/hooks/useUserList.ts
 import { useEffect, useState } from "react";
 import socket from "../api/socket";
 
-export interface UserItem {
-    username: string;
-}
+export type UserItem = {
+    id: string;
+    name: string;
+};
 
 export default function useUserList() {
     const [users, setUsers] = useState<UserItem[]>([]);
 
     useEffect(() => {
-        socket.send({
-            action: "onchat",
-            data: {
-                event: "GET_USER_LIST",
-            },
-        });
+        const unsub = socket.onMessage((msg: any) => {
+            // chỉ quan tâm GET_USER_LIST
+            if (msg?.event !== "GET_USER_LIST") return;
+            if (msg?.status === "error") return;
 
-        const unsubscribe = socket.onMessage((msg: any) => {
-            if (msg.event === "GET_USER_LIST" && Array.isArray(msg.data)) {
-                setUsers(
-                    msg.data.map((u: any) => ({
-                        username: u.user || u.username || u,
-                    }))
-                );
+            const raw = msg.data;
+            if (!Array.isArray(raw)) {
+                setUsers([]);
+                return;
             }
+
+            const normalized = raw.map((u: any, idx: number) => {
+                // nếu server trả về string hoặc number
+                if (typeof u === "string" || typeof u === "number") {
+                    const id = String(u);
+                    return { id, name: id };
+                }
+
+                // nếu server trả về object
+                if (typeof u === "object" && u !== null) {
+                    const id = String(u.id ?? u.userId ?? u.username ?? idx);
+                    const name = String(u.name ?? u.username ?? u.user ?? id);
+                    return { id, name };
+                }
+
+                // fallback
+                return { id: String(idx), name: String(u) };
+            });
+
+            setUsers(normalized);
         });
 
-        return unsubscribe;
+        // khi mount, có thể chủ động yêu cầu danh sách
+        try {
+            socket.send({
+                action: "onchat",
+                data: { event: "GET_USER_LIST" },
+            });
+        } catch {
+            // ignore send error in hook
+        }
+
+        return unsub;
     }, []);
 
     return users;

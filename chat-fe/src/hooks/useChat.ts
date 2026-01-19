@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+// src/hooks/useChat.ts
+import { useEffect, useState, useCallback } from "react";
 import socket from "../api/socket";
 import { ChatMessage, SocketMessage } from "../utils/types";
+import { useAuthContext } from "../context/AuthContext";
 
 export type UserItem = {
     id: string;
@@ -13,86 +15,201 @@ type ChatTarget =
     | null;
 
 export default function useChat() {
+    const { user } = useAuthContext();
     const [currentChat, setCurrentChat] = useState<ChatTarget>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [users, setUsers] = useState<UserItem[]>([]);
 
+    // helper: normalize any incoming content to a safe string
+    const normalizeContent = (raw: any) => {
+        if (raw == null) return "";
+        if (typeof raw === "string" || typeof raw === "number") return String(raw);
+        if (Array.isArray(raw)) {
+            return raw
+                .map((r) => (typeof r === "object" ? JSON.stringify(r) : String(r)))
+                .join(", ");
+        }
+        // object: try common fields
+        const name = raw.name ?? raw.user ?? "";
+        const action = raw.action ?? raw.type ?? "";
+        const actionTime = raw.actionTime ?? raw.time ?? raw.createdAt ?? "";
+        if (name || action || actionTime) {
+            return `${name} ${action} ${actionTime ? `lúc ${actionTime}` : ""}`.trim();
+        }
+        try {
+            return JSON.stringify(raw);
+        } catch {
+            return String(raw);
+        }
+    };
+
     useEffect(() => {
+        // subscribe to socket messages
         const unsub = socket.onMessage((msg: SocketMessage) => {
-            if (msg.status === "error") return;
+            console.log("WS raw message:", msg);
 
-            switch (msg.event) {
-                case "GET_USER_LIST":
-                    if (Array.isArray(msg.data)) {
-                        setUsers(
-                            msg.data.map((u: string) => ({
-                                id: u,
-                                name: u,
-                            }))
-                        );
+            if (msg?.status === "error") return;
+
+            // handle user list separately
+            if (msg.event === "GET_USER_LIST") {
+                const raw = msg.data;
+                if (!Array.isArray(raw)) {
+                    setUsers([]);
+                    return;
+                }
+                const normalized = raw.map((u: any, idx: number) => {
+                    if (typeof u === "string" || typeof u === "number") {
+                        const id = String(u);
+                        return { id, name: id };
                     }
-                    break;
-
-                case "GET_ROOM_CHAT_MESS":
-                case "GET_PEOPLE_CHAT_MES":
-                    if (Array.isArray(msg.data)) {
-                        setMessages(
-                            msg.data.map((m: any) => ({
-                                type: "text",
-                                sender: m.from,
-                                content: m.mes,
-                                time: m.time,
-                            }))
-                        );
+                    if (typeof u === "object" && u !== null) {
+                        const id = String(u.id ?? u.userId ?? u.username ?? idx);
+                        const name = String(u.name ?? u.username ?? u.user ?? id);
+                        return { id, name };
                     }
-                    break;
+                    return { id: String(idx), name: String(u) };
+                });
+                setUsers(normalized);
+                return;
+            }
 
-                case "SYSTEM_MESSAGE":
-                    if (!msg.data) return;
+            // handle chat history responses
+            if (
+                msg.event === "GET_ROOM_CHAT_MES" ||
+                msg.event === "GET_ROOM_CHAT_MESS" ||
+                msg.event === "GET_PEOPLE_CHAT_MES" ||
+                msg.event === "GET_PEOPLE_CHAT_MESS"
+            ) {
+                if (Array.isArray(msg.data)) {
+                    const normalized = msg.data.map((m: any) => ({
+                        type: "text" as const,
+                        sender: m.from ?? m.sender ?? "unknown",
+                        content: normalizeContent(m.mes ?? m.content ?? m),
+                        time: m.time ?? m.actionTime ?? "",
+                    }));
+                    setMessages(normalized);
+                }
+                return;
+            }
 
-                    setMessages((prev) => [
-                        ...prev,
-                        {
-                            type: "text",
-                            sender: "system",
-                            content: `${msg.data.name} ${msg.data.action} lúc ${msg.data.actionTime}`,
-                            time: msg.data.actionTime,
-                        },
-                    ]);
-                    break;
+            // handle system messages (array)
+            if (msg.event === "SYSTEM_MESSAGE") {
+                if (Array.isArray(msg.data)) {
+                    const normalized = msg.data.map((m: any) => ({
+                        type: "system" as const,
+                        content: normalizeContent(m),
+                        time: m.actionTime ?? m.time ?? "",
+                    }));
+                    setMessages(normalized);
+                }
+                return;
+            }
+
+            // realtime single-message events (server may use different event names)
+            if (msg.event === "SEND_CHAT" || msg.event === "NEW_MESSAGE" || msg.event === "RECEIVE_MESSAGE") {
+                const d = msg.data;
+                if (!d) return;
+                const newMsg = {
+                    type: "text" as const,
+                    sender: d.from ?? d.sender ?? "unknown",
+                    content: normalizeContent(d.mes ?? d.content ?? d),
+                    time: d.time ?? d.actionTime ?? new Date().toISOString(),
+                };
+
+                setMessages((prev) => {
+                    // dedupe optimistic message if present: replace last optimistic with server message
+                    const last = prev[prev.length - 1] as any;
+                    if (last && last._optimistic && last.sender === newMsg.sender && last.content === newMsg.content) {
+                        return [...prev.slice(0, -1), newMsg];
+                    }
+                    return [...prev, newMsg];
+                });
+                return;
+            }
+
+            // fallback: if msg.data looks like a single message object
+            if (msg.data && typeof msg.data === "object" && (msg.data.mes || msg.data.content || msg.data.from)) {
+                const d = msg.data;
+                const newMsg = {
+                    type: "text" as const,
+                    sender: d.from ?? d.sender ?? "unknown",
+                    content: normalizeContent(d.mes ?? d.content ?? d),
+                    time: d.time ?? d.actionTime ?? new Date().toISOString(),
+                };
+                setMessages((prev) => [...prev, newMsg]);
             }
         });
 
         return unsub;
-    }, [currentChat]);
+        // intentionally no dependencies so subscription is set once
+    }, []);
 
-    const loadUserList = () => {
-        socket.send({
-            action: "onchat",
-            data: { event: "GET_USER_LIST" },
-        });
-    };
+    // request user list on demand
+    const loadUserList = useCallback(() => {
+        try {
+            socket.send({
+                action: "onchat",
+                data: { event: "GET_USER_LIST" },
+            });
+        } catch {
+            // ignore
+        }
+    }, []);
 
-    const selectChat = (type: "room" | "people", target: string) => {
+    // select chat and request history
+    const selectChat = useCallback((type: "room" | "people", target: string) => {
         setCurrentChat({ type, target });
-        setMessages([]);
-    };
+        setMessages([]); // clear while loading
 
-    const sendMessage = (mes: string) => {
-        if (!currentChat || !mes.trim()) return;
-
-        socket.send({
-            action: "onchat",
-            data: {
-                event: "SEND_CHAT",
+        try {
+            socket.send({
+                action: "onchat",
                 data: {
-                    type: currentChat.type,
-                    to: currentChat.target,
-                    mes,
+                    event: type === "room" ? "GET_ROOM_CHAT_MES" : "GET_PEOPLE_CHAT_MES",
+                    data: { name: target, page: 1 },
                 },
-            },
-        });
-    };
+            });
+        } catch {
+            // ignore send error
+        }
+    }, []);
+
+    // send message with optimistic update; uses current user from context
+    const sendMessage = useCallback(
+        (mes: string) => {
+            if (!currentChat || !mes.trim()) return;
+
+            const currentUsername = user?.username ?? "me";
+
+            // optimistic message (flagged so we can replace if server echoes)
+            const optimistic: any = {
+                type: "text",
+                sender: currentUsername,
+                content: mes,
+                time: new Date().toISOString(),
+                _optimistic: true,
+            };
+            setMessages((prev) => [...prev, optimistic]);
+
+            try {
+                socket.send({
+                    action: "onchat",
+                    data: {
+                        event: "SEND_CHAT",
+                        data: {
+                            type: currentChat.type,
+                            to: currentChat.target,
+                            mes,
+                        },
+                    },
+                });
+            } catch {
+                // if send fails, remove optimistic or mark as failed (simple approach: remove)
+                setMessages((prev) => prev.filter((m: any) => m !== optimistic));
+            }
+        },
+        [currentChat, user]
+    );
 
     return {
         users,
