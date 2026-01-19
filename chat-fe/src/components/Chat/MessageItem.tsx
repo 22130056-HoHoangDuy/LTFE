@@ -30,7 +30,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => (
         )}
         <div
             style={{
-                background: message.isUser ? "#1DB954" : "#3E3E3E",
+                background: message.isUser ? "#2196f3" : "#3E3E3E",
                 color: "#fff",
                 padding: "10px 15px",
                 borderRadius: 10,

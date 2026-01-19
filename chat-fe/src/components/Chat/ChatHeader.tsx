@@ -22,5 +22,4 @@ const ChatHeader: React.FC = () => {
         </div>
     );
 };
-
 export default ChatHeader;

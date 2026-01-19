@@ -1,3 +1,4 @@
+// SidebarIcon.tsx
 import React from "react";
 
 interface User {
@@ -12,7 +13,7 @@ interface Props {
     onClickSetting: () => void,
     showAccountDialog: boolean,
     showSettingDialog: boolean,
-
+    theme: "dark" | "light";
 }
 
 // Styles cho hiệu ứng hover icon
@@ -39,10 +40,15 @@ const SidebarIcon: React.FC<Props> = ({
                                           onClickAvatar,
                                           onClickSetting,
                                           showAccountDialog,
-                                          showSettingDialog
+                                          showSettingDialog,
+                                          theme
                                       }) => {
-    // State chỉ cần cho avatar, các icon còn lại dùng CSS group hover bằng sự kiện onMouseEnter/Leave
     const [hoverIdx, setHoverIdx] = React.useState<number | null>(null);
+
+    // Đổi màu theo theme
+    const sidebarBg = theme === "dark" ? "#191919" : "#f3f5f7";
+    const sidebarText = theme === "dark" ? "#fff" : "#222";
+    const avatarBoxBg = theme === "dark" ? "#444" : "#eaeaeb";
 
     // Xác định src cho icon thường và icon hover
     const avatarSrc = hoverIdx === 0 ? user.avatar.replace('.svg', '1.svg') : user.avatar;
@@ -54,8 +60,8 @@ const SidebarIcon: React.FC<Props> = ({
         <div
             style={{
                 width: 60,
-                background: "#191919",
-                color: "#fff",
+                background: sidebarBg,
+                color: sidebarText,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -68,7 +74,7 @@ const SidebarIcon: React.FC<Props> = ({
                 onClick={onClickAvatar}
                 style={{
                     ...iconBoxStyle,
-                    background: "#444",
+                    background: avatarBoxBg,
                     marginBottom: 28,
                     ...((hoverIdx === 0 || showAccountDialog) ? iconBoxHoverStyle : {})
                 }}
@@ -76,13 +82,11 @@ const SidebarIcon: React.FC<Props> = ({
                 onMouseLeave={() => setHoverIdx(null)}
                 title={user.name}
             >
-                <img src={avatarSrc} width={30} height={30} alt=""/>
+                <img src={avatarSrc} width={30} height={30} alt="" />
             </div>
             {/* Icon chat */}
             <div
-                style={{
-                    marginBottom: 18,
-                }}
+                style={{ marginBottom: 18 }}
                 onMouseEnter={() => setHoverIdx(1)}
                 onMouseLeave={() => setHoverIdx(null)}
             >
@@ -92,14 +96,12 @@ const SidebarIcon: React.FC<Props> = ({
                         ...(hoverIdx === 1 ? iconBoxHoverStyle : {})
                     }}
                 >
-                    <img src={chatSrc} width={28} alt="icon-chat"/>
+                    <img src={chatSrc} width={28} alt="icon-chat" />
                 </div>
             </div>
             {/* Icon room */}
             <div
-                style={{
-                    marginBottom: 18,
-                }}
+                style={{ marginBottom: 18 }}
                 onMouseEnter={() => setHoverIdx(2)}
                 onMouseLeave={() => setHoverIdx(null)}
             >
@@ -109,15 +111,12 @@ const SidebarIcon: React.FC<Props> = ({
                         ...(hoverIdx === 2 ? iconBoxHoverStyle : {})
                     }}
                 >
-                    <img src={roomSrc} width={28} alt="icon-contact"/>
+                    <img src={roomSrc} width={28} alt="icon-contact" />
                 </div>
             </div>
             {/* Icon setting */}
             <div
-                style={{
-                    marginTop: "auto",
-                    marginBottom: 16,
-                }}
+                style={{ marginTop: "auto", marginBottom: 16 }}
                 onMouseEnter={() => setHoverIdx(3)}
                 onMouseLeave={() => setHoverIdx(null)}
                 onClick={onClickSetting}
@@ -128,7 +127,7 @@ const SidebarIcon: React.FC<Props> = ({
                         ...((hoverIdx === 3 || showSettingDialog) ? iconBoxHoverStyle : {})
                     }}
                 >
-                    <img src={settingSrc} width={28} alt="icon-setting"/>
+                    <img src={settingSrc} width={28} alt="icon-setting" />
                 </div>
             </div>
         </div>

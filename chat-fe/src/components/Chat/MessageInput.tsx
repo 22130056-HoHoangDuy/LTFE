@@ -30,6 +30,18 @@ const MessageInput: React.FC<Props> = ({ onSend }) => {
                 style={{
                     flex: 1,
                     background: "#1e1e1e",
+                    padding: 10,
+                    border: "none",
+                    borderRadius: 6,
+                    marginRight: 10,
+                    background: "#1E1E1E",
+                    color: "#fff",
+                    opacity: currentChat ? 1 : 0.5,
+                }}
+            />
+            <button
+                style={{
+                    background: "#2196f3",
                     color: "#fff",
                     border: "none",
                     borderRadius: 6,
@@ -41,5 +53,4 @@ const MessageInput: React.FC<Props> = ({ onSend }) => {
         </div>
     );
 };
-
 export default MessageInput;
