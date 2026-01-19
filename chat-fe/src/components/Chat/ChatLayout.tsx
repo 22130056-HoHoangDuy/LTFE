@@ -9,6 +9,9 @@ const ChatLayout: React.FC = () => {
 
     if (!user) return null;
 
+    // Debug: log messages trước khi render
+    console.log("messages to render:", chat.messages);
+
     return (
         <div
             style={{
@@ -27,44 +30,8 @@ const ChatLayout: React.FC = () => {
                 }}
             >
                 {chat.messages.map((m, i) => {
-                    // 🟢 TEXT MESSAGE
-                    if (m.type === "text") {
-                        const isMine = m.sender === user.username;
-
-                        return (
-                            <div
-                                key={i}
-                                style={{
-                                    display: "flex",
-                                    justifyContent: isMine
-                                        ? "flex-end"
-                                        : "flex-start",
-                                    marginBottom: 10,
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        maxWidth: "65%",
-                                        padding: "10px 14px",
-                                        borderRadius: 14,
-                                        background: isMine
-                                            ? "#1DB954"
-                                            : "#1e1e1e",
-                                        color: isMine ? "#000" : "#fff",
-                                        fontSize: 14,
-                                        wordBreak: "break-word",
-                                    }}
-                                >
-                                    {m.content}
-                                </div>
-                            </div>
-                        );
-                    }
-
-                    // 🔵 SYSTEM MESSAGE
+                    // system message (content đã normalize thành string theo useChat)
                     if (m.type === "system") {
-                        const { name, action, actionTime } = m.content;
-
                         return (
                             <div
                                 key={i}
@@ -76,12 +43,39 @@ const ChatLayout: React.FC = () => {
                                     color: "#ccc",
                                 }}
                             >
-                                { name } { action } lúc { actionTime }
+                                {/* defensive: nếu content vẫn là object (trường hợp hiếm), stringify */}
+                                {typeof m.content === "object" ? JSON.stringify(m.content) : m.content}
                             </div>
                         );
                     }
 
-                    return null;
+                    // text message
+                    const isMine = m.sender === user.username;
+
+                    return (
+                        <div
+                            key={i}
+                            style={{
+                                display: "flex",
+                                justifyContent: isMine ? "flex-end" : "flex-start",
+                                marginBottom: 10,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    maxWidth: "65%",
+                                    padding: "10px 14px",
+                                    borderRadius: 14,
+                                    background: isMine ? "#1DB954" : "#1e1e1e",
+                                    color: isMine ? "#000" : "#fff",
+                                    fontSize: 14,
+                                    wordBreak: "break-word",
+                                }}
+                            >
+                                {typeof m.content === "object" ? JSON.stringify(m.content) : m.content}
+                            </div>
+                        </div>
+                    );
                 })}
             </div>
 

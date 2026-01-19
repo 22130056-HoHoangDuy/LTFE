@@ -4,7 +4,15 @@ export type User = {
     username: string;
 };
 
-// ===== MESSAGE =====
+// ===== SOCKET =====
+export type SocketMessage = {
+    event: string;
+    status?: "success" | "error";
+    data?: any;
+    mes?: string;
+};
+
+// Chuẩn hoá: frontend chỉ dùng content là string
 export type TextMessage = {
     type: "text";
     sender: string;
@@ -14,19 +22,8 @@ export type TextMessage = {
 
 export type SystemMessage = {
     type: "system";
-    content: {
-        name: string;
-        action: string;
-        actionTime: string;
-    };
+    content: string; // đã format thành string
+    time?: string;
 };
 
 export type ChatMessage = TextMessage | SystemMessage;
-
-// ===== SOCKET =====
-export type SocketMessage = {
-    event: string;
-    status?: "success" | "error";
-    data?: any;
-    mes?: string;
-};
