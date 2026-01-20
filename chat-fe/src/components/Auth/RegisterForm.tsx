@@ -21,11 +21,13 @@ export default function RegisterForm() {
             },
         });
 
-        socket.onMessage((msg) => {
+        const unsubscribe = socket.onMessage((msg) => {
             if (msg.event === "REGISTER" && msg.status === "success") {
                 setSuccess("Đăng ký thành công, hãy đăng nhập");
+                unsubscribe();
             } else if (msg.event === "REGISTER") {
                 setError("Tài khoản đã tồn tại");
+                unsubscribe();
             }
         });
     };

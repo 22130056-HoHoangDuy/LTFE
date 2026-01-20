@@ -19,7 +19,8 @@ class SocketService {
             return;
         }
 
-        this.socket = new WebSocket("wss://chat.longapp.site/chat/chat");
+        const wsUrl = process.env.REACT_APP_WS_URL || "wss://chat.longapp.site/chat/chat";
+        this.socket = new WebSocket(wsUrl);
 
         this.socket.onopen = () => {
             console.log("WebSocket connected");
