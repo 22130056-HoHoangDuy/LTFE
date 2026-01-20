@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { createContext, useContext, useState, useEffect } from "react";
+=======
+import { createContext, useContext, useState } from "react";
+>>>>>>> e34ca1c6bee647ffe2a98330c2d498cb549c3d60
 
 export type User = {
     username: string;
@@ -15,6 +19,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+<<<<<<< HEAD
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -40,6 +45,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     if (loading) return null; // or a spinner
+=======
+
+    const login = (u: User) => setUser(u);
+    const logout = () => setUser(null);
+>>>>>>> e34ca1c6bee647ffe2a98330c2d498cb549c3d60
 
     return (
         <AuthContext.Provider

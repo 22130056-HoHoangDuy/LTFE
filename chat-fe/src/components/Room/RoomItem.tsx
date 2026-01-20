@@ -4,7 +4,11 @@ const styles = {
     item: (selected: boolean) => ({
         borderRadius: 7,
         padding: "10px 8px",
+<<<<<<< HEAD
         background: selected ? "#244D3D" : "#292929",
+=======
+        background: selected ? "#0E558D" : "#292929",
+>>>>>>> e34ca1c6bee647ffe2a98330c2d498cb549c3d60
         color: "#fff",
         display: "flex",
         alignItems: "center",
