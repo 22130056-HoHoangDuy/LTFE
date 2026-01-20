@@ -1,36 +1,50 @@
 import React from "react";
+import { useAuthContext } from "../../context/AuthContext";
 
 type ChatHeaderProps = {
     roomName?: string;
-    // onBack, user, onLogout
+    theme: "dark" | "light";
 };
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName = "Minh Hao" }) => (
-    <div
-        style={{
-            display: "flex",
-            alignItems: "center",
-            background: "#1E1E1E",
-            color: "#fff",
-            padding: "10px 20px",
-            borderBottom: "1px solid #333",
-        }}
-    >
-        <button
+const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, theme }) => {
+    const { user } = useAuthContext();
+
+    // Màu theo theme
+    const bg = theme === "dark" ? "#1E1E1E" : "#f8f9fa";
+    const color = theme === "dark" ? "#fff" : "#222";
+    const border = theme === "dark" ? "#333" : "#e0e0e0";
+    const buttonBg = theme === "dark" ? "#2196f3" : "#e3eafc";
+    const buttonColor = theme === "dark" ? "#fff" : "#1565c0";
+
+    return (
+        <div
             style={{
-                background: "#2196f3",
-                color: "#fff",
-                border: "none",
-                borderRadius: 6,
-                padding: "8px 16px",
-                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                background: bg,
+                color: color,
+                padding: "10px 20px",
+                borderBottom: `1px solid ${border}`,
             }}
-            // onClick={() => ...}
         >
-            &lt;
-        </button>
-        <h2 style={{ margin: 0, marginLeft: 10, fontSize: "1.2rem" }}>{roomName}</h2>
-    </div>
-);
+            <button
+                style={{
+                    background: buttonBg,
+                    color: buttonColor,
+                    border: "none",
+                    borderRadius: 6,
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                }}
+                // onClick={() => ...}
+            >
+                &lt;
+            </button>
+            <h2 style={{ margin: 0, marginLeft: 10, fontSize: "1.2rem" }}>
+                {roomName || user?.username || "Chat"}
+            </h2>
+        </div>
+    );
+};
 
 export default ChatHeader;

@@ -1,6 +1,5 @@
 // src/hooks/useUserList.ts
 import { useEffect, useState } from "react";
-// @ts-ignore
 import socket from "../api/socket";
 
 export type UserItem = {

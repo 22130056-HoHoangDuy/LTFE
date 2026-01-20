@@ -1,7 +1,11 @@
 // src/hooks/useChat.ts
 import { useEffect, useState, useCallback } from "react";
+
+// @ts-ignore
 import socket from "../api/socket";
+// @ts-ignore
 import { ChatMessage, SocketMessage } from "../utils/types";
+// @ts-ignore
 import { useAuthContext } from "../context/AuthContext";
 
 export type UserItem = {

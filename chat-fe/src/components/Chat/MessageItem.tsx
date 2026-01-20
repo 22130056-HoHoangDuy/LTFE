@@ -9,44 +9,55 @@ export type Message = {
 
 type MessageItemProps = {
     message: Message;
+    theme: "dark" | "light";
 };
 
-const MessageItem: React.FC<MessageItemProps> = ({ message }) => (
-    <div
-        style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 10,
-            maxWidth: "70%",
-            alignSelf: message.isUser ? "flex-end" : "flex-start",
-        }}
-    >
-        {!message.isUser && (
-            <img
-                src={message.avatar || "https://via.placeholder.com/40"}
-                alt="avatar"
-                style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                }}
-            />
-        )}
+const MessageItem: React.FC<MessageItemProps> = ({ message, theme }) => {
+    const bg = message.isUser
+        ? theme === "dark" ? "#2196f3" : "#e3eafc"
+        : theme === "dark" ? "#3E3E3E" : "#f3f3f4";
+    const color = message.isUser
+        ? theme === "dark" ? "#fff" : "#1565c0"
+        : theme === "dark" ? "#fff" : "#222";
+    const timestampColor = theme === "dark" ? "#b0b0b0" : "#888";
+
+    return (
         <div
             style={{
-                background: message.isUser ? "#2196f3" : "#3E3E3E",
-                color: "#fff",
-                padding: "10px 15px",
-                borderRadius: 10,
-                boxShadow: "0px 4px 6px rgba(0,0,0,0.2)",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                maxWidth: "70%",
+                alignSelf: message.isUser ? "flex-end" : "flex-start",
             }}
         >
-            <p style={{ margin: 0 }}>{message.text}</p>
-            <span style={{ fontSize: "0.8em", color: "#b0b0b0", marginTop: 5 }}>
-                {message.timestamp}
-            </span>
+            {!message.isUser && (
+                <img
+                    src={message.avatar || "https://via.placeholder.com/40"}
+                    alt="avatar"
+                    style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                    }}
+                />
+            )}
+            <div
+                style={{
+                    background: bg,
+                    color: color,
+                    padding: "10px 15px",
+                    borderRadius: 10,
+                    boxShadow: "0px 4px 6px rgba(0,0,0,0.2)",
+                }}
+            >
+                <p style={{ margin: 0 }}>{message.text}</p>
+                <span style={{ fontSize: "0.8em", color: timestampColor, marginTop: 5 }}>
+                    {message.timestamp}
+                </span>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 export default MessageItem;

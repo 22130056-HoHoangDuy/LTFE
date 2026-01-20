@@ -1,58 +1,66 @@
-import React from "react";
-import ChatLayout from "../Chat/ChatLayout";
+import React, { useEffect } from "react";
 import Aurora from "../common/Aurora";
+import ChatLayout from "../Chat/ChatLayout";
+import useChat from "../../hooks/useChat";
+import { useAuthContext } from "../../context/AuthContext";
 
-// Có thể truyền user, room cho ChatLayout
 interface Props {
     selectedRoom: string | null;
+    theme: "dark" | "light";
     user: {
         name: string;
         username: string;
         avatar: string;
     };
-    theme: "dark" | "light";
 }
 
-const ChatMainView: React.FC<Props> = ({ selectedRoom, user, theme }) => {
-    // Đổi màu text theo theme
+const ChatMainView: React.FC<Props> = ({ selectedRoom, theme, user }) => {
+    const chat = useChat();
+
+    useEffect(() => {
+        if (selectedRoom) {
+            chat.selectChat("people", selectedRoom);
+        }
+    }, [selectedRoom]);
+
     const textColor = theme === "dark" ? "#fff" : "#222";
 
-    // Nếu chưa chọn phòng thì render background
     if (!selectedRoom) {
         return (
             <div style={{ position: "relative", width: "100%", height: "100%" }}>
-                {/* Aurora background */}
                 <Aurora
                     colorStops={["#3A29FF", "#19C1E7", "#10A478"]}
                     blend={0.5}
                     amplitude={1.0}
                     speed={0.5}
                 />
-                {/* Overlay chữ (hiện trên nền Aurora) */}
                 <div
                     style={{
                         position: "absolute",
-                        top: 0, left: 0, right: 0, bottom: 0,
+                        inset: 0,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         color: textColor,
                         fontSize: 22,
                         fontWeight: 600,
-                        pointerEvents: "none"
                     }}
                 >
-                    Hãy chọn phòng hoặc người bạn muốn trò chuyện để bắt đầu...
+                    Hãy chọn phòng hoặc người để bắt đầu trò chuyện
                 </div>
             </div>
         );
     }
+
     return (
         <div style={{ flex: 1, color: textColor }}>
-            {/* Chỗ này để render chatbox của phòng đã chọn */}
-            {/*<ChatLayout roomId={selectedRoom} user={user}*/}
-            /* Chỗ này để xử lý load & hiển thị nội dung phòng chat */
-            {/*/>*/}
+            {/* Nếu ChatLayout cần user và selectedRoom, hãy truyền */}
+            {/* <ChatLayout roomId={selectedRoom} user={user} /> */}
+            <ChatLayout user={{
+                name: "",
+                username: "",
+                avatar: ""
+            }} theme={"dark"} />
         </div>
     );
 };

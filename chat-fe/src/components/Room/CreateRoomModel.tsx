@@ -3,15 +3,21 @@ import React from "react";
 interface CreateRoomModalProps {
     open: boolean;
     onClose: () => void;
+    theme: "dark" | "light";
     // Có thể nhận thêm callback tạo phòng
 }
 
 const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                                                              open,
                                                              onClose,
+                                                             theme,
                                                              // props khác
                                                          }) => {
     if (!open) return null;
+
+    const bg = theme === "dark" ? "#191919" : "#fff";
+    const color = theme === "dark" ? "#fff" : "#222";
+    const closeBtnColor = theme === "dark" ? "#fff" : "#222";
 
     return (
         <div
@@ -27,8 +33,8 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
         >
             <div
                 style={{
-                    background: "#191919",
-                    color: "#fff",
+                    background: bg,
+                    color,
                     borderRadius: 10,
                     padding: 28,
                     minWidth: 300,
@@ -37,7 +43,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                     position: "relative"
                 }}
             >
-                <div style={{fontWeight: 600, fontSize: 20, marginBottom: 16}}>
+                <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 16 }}>
                     Tạo phòng mới
                 </div>
                 {/* Chỗ này để form nhập tên phòng, chọn người tham gia... */}
@@ -47,9 +53,10 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                 <button
                     style={{
                         position: "absolute",
-                        top: 10, right: 16,
+                        top: 10,
+                        right: 16,
                         background: "transparent",
-                        color: "#fff",
+                        color: closeBtnColor,
                         fontSize: 22,
                         border: "none",
                         cursor: "pointer"

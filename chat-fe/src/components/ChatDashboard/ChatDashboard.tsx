@@ -2,15 +2,12 @@ import React, { useState } from "react";
 import SidebarIcon from "./SidebarIcon";
 import ChatSidebar from "./ChatSidebar";
 import ChatMainView from "./ChatMainView";
+import { useAuthContext } from "../../context/AuthContext";
 
-// Giả định có UserContext hoặc lấy từ props/hook
-const mockUser = {
-    name: "Nguyễn Võ Minh Hào",
-    username: "22130074",
-    avatar: "/icons/avatar.svg", // icon mẫu
-};
 
 const ChatDashboard: React.FC = () => {
+    // Lấy user từ backend/context/api
+    const { user } = useAuthContext();
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
 
     // State cho popup avatar/profile/setting
@@ -32,6 +29,9 @@ const ChatDashboard: React.FC = () => {
     const popupBg = theme === "dark" ? "#232323" : "#fff";
     const popupText = theme === "dark" ? "#fff" : "#222";
     const popupBorder = theme === "dark" ? "#aaa" : "#d6d6d6";
+
+    // Nếu chưa có user từ backend/context thì không render
+    if (!user) return null;
 
     return (
         <div style={{
@@ -59,7 +59,7 @@ const ChatDashboard: React.FC = () => {
                 zIndex: 2,
                 position: "relative"
             }}>
-                App chat - {mockUser.name}
+                App chat - {user.username}
                 {/* ICON đổi theme */}
                 <img
                     src={theme === "dark" ? "/icons/night.svg" : "/icons/light.svg"}
@@ -82,7 +82,11 @@ const ChatDashboard: React.FC = () => {
             <div style={{ display: "flex", flex: 1, minHeight: 0, minWidth: 0 }}>
                 {/* Column 1: SidebarIcon */}
                 <SidebarIcon
-                    user={mockUser}
+                    user={{
+                        name: user.username || user.username,
+                        username: user.username,
+                        avatar: "",
+                    }}
                     onClickAvatar={() => setShowAccountDialog(true)}
                     onClickSetting={() => setShowSettingDialog(true)}
                     showAccountDialog={showAccountDialog}
@@ -91,13 +95,21 @@ const ChatDashboard: React.FC = () => {
                 />
                 {/* Column 2: ChatSidebar */}
                 <ChatSidebar
-                    user={mockUser}
+                    user={{
+                        name: user.username || user.username,
+                        username: user.username,
+                        avatar: "",
+                    }}
                     onSelectRoom={setSelectedRoom}
                     selectedRoom={selectedRoom}
                     theme={theme}
                 />
                 {/* Column 3: MainView */}
-                <ChatMainView selectedRoom={selectedRoom} user={mockUser} theme={theme} />
+                <ChatMainView selectedRoom={selectedRoom} user={{
+                    name: user.username || user.username,
+                    username: user.username,
+                    avatar: "",
+                }} theme={theme} />
             </div>
             {/* Popup menu/setting */}
             {showAccountDialog && (
@@ -113,7 +125,7 @@ const ChatDashboard: React.FC = () => {
                         padding: 12
                     }}>
                     <div style={{ borderBottom: `2px solid ${popupBorder}`, paddingBottom: 6, marginBottom: 10 }}>
-                        <strong>{mockUser.name}</strong>
+                        <strong>{user.username}</strong>
                     </div>
                     <div
                         style={{
