@@ -8,7 +8,7 @@ export type MessageUI = {
 };
 
 type MessageItemProps = {
-    message: Message;
+    message: MessageUI;
     theme: "dark" | "light";
 };
 

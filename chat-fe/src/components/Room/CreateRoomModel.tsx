@@ -1,34 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface CreateRoomModalProps {
     open: boolean;
     onClose: () => void;
     theme: "dark" | "light";
-    // Có thể nhận thêm callback tạo phòng
+    onCreateRoom: (roomName: string) => void; // 👈 callback
 }
 
 const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                                                              open,
                                                              onClose,
                                                              theme,
-                                                             // props khác
+                                                             onCreateRoom,
                                                          }) => {
+    const [roomName, setRoomName] = useState("");
+
     if (!open) return null;
 
     const bg = theme === "dark" ? "#191919" : "#fff";
     const color = theme === "dark" ? "#fff" : "#222";
     const closeBtnColor = theme === "dark" ? "#fff" : "#222";
 
+    const handleCreate = () => {
+        if (!roomName.trim()) return;
+        onCreateRoom(roomName.trim());
+        setRoomName("");
+        onClose();
+    };
+
     return (
         <div
             style={{
                 position: "fixed",
-                top: 0, left: 0, right: 0, bottom: 0,
+                inset: 0,
                 background: "rgba(0,0,0,0.35)",
                 zIndex: 2000,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "center",
             }}
         >
             <div
@@ -37,17 +46,43 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                     color,
                     borderRadius: 10,
                     padding: 28,
-                    minWidth: 300,
+                    minWidth: 320,
                     minHeight: 180,
                     boxShadow: "0 4px 32px #0005",
-                    position: "relative"
+                    position: "relative",
                 }}
             >
                 <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 16 }}>
                     Tạo phòng mới
                 </div>
-                {/* Chỗ này để form nhập tên phòng, chọn người tham gia... */}
-                {/* Chỗ này để xử lý tạo phòng mới, gọi backend */}
+
+                <input
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
+                    placeholder="Tên phòng..."
+                    style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: 6,
+                        border: "1px solid #ccc",
+                        marginBottom: 14,
+                    }}
+                />
+
+                <button
+                    onClick={handleCreate}
+                    style={{
+                        padding: "8px 16px",
+                        borderRadius: 6,
+                        border: "none",
+                        background: "#1DB954",
+                        color: "#fff",
+                        cursor: "pointer",
+                        fontWeight: 500,
+                    }}
+                >
+                    Tạo
+                </button>
 
                 {/* Đóng modal */}
                 <button
@@ -59,11 +94,12 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                         color: closeBtnColor,
                         fontSize: 22,
                         border: "none",
-                        cursor: "pointer"
+                        cursor: "pointer",
                     }}
                     onClick={onClose}
                     aria-label="Đóng"
-                >×
+                >
+                    ×
                 </button>
             </div>
         </div>

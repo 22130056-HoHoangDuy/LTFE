@@ -1,6 +1,9 @@
 import React from "react";
 import MessageInput from "./MessageInput";
 import useChat from "../../hooks/useChat";
+import ChatHeader from "./ChatHeader";
+import MessageList from "./MessageList";
+
 
 interface ChatLayoutProps {
     roomName?: string;

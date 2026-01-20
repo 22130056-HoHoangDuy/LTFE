@@ -2,6 +2,12 @@ import React, { useMemo, useState } from "react";
 import { chatDashboardColors as c } from "./dashboardStyles";
 import RoomList from "../Room/RoomList";
 import useUserList from "../../hooks/useUserList";
+import CreateRoomModal from "../Room/CreateRoomModel";
+import socketService from "../../api/socket";
+import { useEffect } from "react";
+
+
+
 
 interface Props {
     user: {
@@ -14,12 +20,74 @@ interface Props {
     theme: "dark" | "light";
 }
 
+
+
+
+
 const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom, theme }) => {
     const usersRaw = useUserList();
     const [keyword, setKeyword] = useState("");
     const [hoverSearch, setHoverSearch] = useState(false);
     const [hoverCreate, setHoverCreate] = useState(false);
     const [searchFocus, setSearchFocus] = useState(false);
+
+    const [openCreate, setOpenCreate] = useState(false);
+
+    const [rooms, setRooms] = useState<{ id: string; name: string; time: string }[]>([]);
+
+    const handleCreateRoom = (roomName: string) => {
+        const tempId = "temp-" + Date.now();
+        // 👇 1. hiện phòng ngay lập tức
+        setRooms((prev) => [
+            { id: tempId, name: roomName, time: "" },
+            ...prev,
+        ]);
+
+        // 👇 2. gửi WS lên backend
+        const payload = {
+            action: "onchat",
+            data: {
+                event: "CREATE_ROOM",
+                data: { name: roomName },
+            },
+        };
+
+        socketService.send(payload);
+    };
+
+
+
+    useEffect(() => {
+        socketService.connect();
+        const off = socketService.onMessage((msg) => {
+            console.log("WS IN:", msg);
+
+            // backend wrap: { action, data: { event, data } }
+            if (msg?.data?.event === "ROOM_CREATED") {
+                const room = msg.data.data;
+
+                setRooms((prev) => {
+                    // 👇 xóa phòng temp cùng tên
+                    const filtered = prev.filter(
+                        (r) => !r.id.startsWith("temp-") || r.name !== room.name
+                    );
+
+                    return [
+                        {
+                            id: String(room.id),
+                            name: room.name,
+                            time: "",
+                        },
+                        ...filtered,
+                    ];
+                });
+            }
+        });
+
+        return off; // cleanup listener
+    }, []);
+
+
 
     // normalize users thành { id, name }
     const users = useMemo(() => {
@@ -124,26 +192,45 @@ const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom, theme 
                     padding: "6px 22px",
                     cursor: "pointer",
                     fontWeight: 450,
-                    transition: "background 0.17s, border 0.17s"
+                    transition: "background 0.17s, border 0.17s",
                 }}
                 onMouseEnter={() => setHoverCreate(true)}
                 onMouseLeave={() => setHoverCreate(false)}
+                onClick={() => setOpenCreate(true)}   // 👈 mở modal
             >
+
                 Tạo phòng
             </button>
             {/* 👥 USER LIST */}
             <div style={{ overflowY: "auto", flex: 1 }}>
                 <RoomList
-                    rooms={filteredUsers.map((u) => ({
-                        id: u.id,
-                        name: u.name,
-                        time: "",
-                    }))}
+                    rooms={[
+                        ...rooms,
+                        ...filteredUsers.map((u) => ({
+                            id: u.id,
+                            name: u.name,
+                            time: "",
+                        })),
+                    ]}
                     selectedRoomId={selectedRoom}
                     onSelectRoom={onSelectRoom} theme={"dark"}                />
             </div>
+
+            <CreateRoomModal
+                open={openCreate}
+                onClose={() => setOpenCreate(false)}
+                theme={theme}
+                onCreateRoom={handleCreateRoom}
+            />
+
+
+
         </div>
+
     );
 };
+
+
+
 
 export default ChatSidebar;
