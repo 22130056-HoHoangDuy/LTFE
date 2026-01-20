@@ -3,6 +3,9 @@ import SidebarIcon from "./SidebarIcon";
 import ChatSidebar from "./ChatSidebar";
 import ChatMainView from "./ChatMainView";
 import { useAuthContext } from "../../context/AuthContext";
+import SidebarIcon from "./SidebarIcon";
+import ChatSidebar from "./ChatSidebar";
+
 
 
 import { UserItem } from "../../hooks/useUserList";
@@ -30,6 +33,11 @@ const ChatDashboard: React.FC = () => {
     const popupBg = theme === "dark" ? "#232323" : "#fff";
     const popupText = theme === "dark" ? "#fff" : "#222";
     const popupBorder = theme === "dark" ? "#aaa" : "#d6d6d6";
+
+    const [showAccountDialog, setShowAccountDialog] = useState(false);
+    const [showSettingDialog, setShowSettingDialog] = useState(false);
+    const [hoverPopupIdx, setHoverPopupIdx] = useState<number | null>(null);
+
 
     // Nếu chưa có user từ backend/context thì không render
     if (!user) return null;

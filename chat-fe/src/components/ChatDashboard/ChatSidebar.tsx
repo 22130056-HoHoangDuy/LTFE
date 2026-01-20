@@ -17,6 +17,10 @@ interface Props {
     theme: "dark" | "light";
 }
 
+
+
+
+
 const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom, theme }) => {
     const usersRaw = useUserList();
     const [keyword, setKeyword] = useState("");
@@ -133,13 +137,13 @@ const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom, theme 
                     padding: "6px 22px",
                     cursor: "pointer",
                     fontWeight: 450,
-                    transition: "background 0.17s, border 0.17s"
+                    transition: "background 0.17s, border 0.17s",
                 }}
                 onMouseEnter={() => setHoverCreate(true)}
                 onMouseLeave={() => setHoverCreate(false)}
                 onClick={() => setIsCreating(!isCreating)}
             >
-                {isCreating ? "Hủy" : "Tạo phòng"}
+                {isCreating ? "Hủy" : "Tạo phòng"}n
             </button>
 
             {isCreating && (
@@ -182,7 +186,11 @@ const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom, theme 
                     selectedRoomId={selectedRoom?.id || null}
                     onSelectRoom={onSelectRoom} theme={theme} /> </div>
         </div>
+
     );
 };
+
+
+
 
 export default ChatSidebar;

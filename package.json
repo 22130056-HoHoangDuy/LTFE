@@ -3,7 +3,11 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "framer-motion": "^12.24.10",
-    "react-router-dom": "^7.10.1"
+    "motion": "^12.27.1",
+    "ogl": "^1.0.11",
+    "react-router-dom": "^7.10.1",
+    "react-scripts": "^0.0.0",
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "typescript": "^4.9.5"

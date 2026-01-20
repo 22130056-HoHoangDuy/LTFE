@@ -22,9 +22,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-echo .idea/ >> .gitignore
-git add .gitignore
-git commit -m "ignore IDE config"
-git push
+
 
 .idea/

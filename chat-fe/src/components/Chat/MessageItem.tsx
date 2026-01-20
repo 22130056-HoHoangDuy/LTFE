@@ -12,7 +12,7 @@ export type Message = {
 };
 
 type MessageItemProps = {
-    message: Message;
+    message: MessageUI;
     theme: "dark" | "light";
 };
 
