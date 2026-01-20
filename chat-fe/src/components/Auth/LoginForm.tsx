@@ -1,23 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import socket from "../../api/socket";
+import { styles } from "./authStyles";
 import { User } from "../../utils/types";
 
 type Props = {
     onSuccess: (user: User) => void;
 };
 
-const LoginForm: React.FC<Props> = ({ onSuccess }) => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+export default function LoginForm({ onSuccess }: Props) {
+    const [user, setUser] = useState("");
+    const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     const handleLogin = () => {
-        if (!username || !password) {
-            setError("Vui lòng nhập đầy đủ thông tin");
-            return;
-        }
-
         setLoading(true);
         setError("");
 
@@ -25,54 +22,57 @@ const LoginForm: React.FC<Props> = ({ onSuccess }) => {
             action: "onchat",
             data: {
                 event: "LOGIN",
-                data: {
-                    user: username,
-                    pass: password,
-                },
+                data: { user, pass },
             },
         });
 
-        const unsubscribe = socket.onMessage((msg: any) => {
+        socket.onMessage((msg) => {
             if (msg.event === "LOGIN" && msg.status === "success") {
-                const user: User = {
-                    id: msg.data?.code || "",
-                    username,
-                };
-
-                onSuccess(user);
-                unsubscribe();
-            }
-
-            if (msg.event === "LOGIN" && msg.status === "error") {
-                setError(msg.mes || "Đăng nhập thất bại");
+                onSuccess({
+                    id: msg.data.id ?? "",
+                    username: msg.data.user || user,
+                });
+            } else if (msg.event === "LOGIN") {
+                setError("Sai tài khoản hoặc mật khẩu");
                 setLoading(false);
-                unsubscribe();
             }
         });
     };
 
     return (
-        <div>
+        <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+            <h2 style={styles.title}>Login</h2>
+
             <input
+                style={styles.input}
                 placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
             />
 
             <input
+                style={styles.input}
                 type="password"
-                placeholder="Mật khẩu"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
             />
 
-            {error && <div style={{ color: "red" }}>{error}</div>}
+            {error && <div style={styles.error}>{error}</div>}
 
-            <button onClick={handleLogin} disabled={loading}>
-                {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-            </button>
-        </div>
+            <motion.button
+                style={styles.button}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogin}
+                disabled={loading}
+            >
+                {loading ? "Logging in..." : "Login"}
+            </motion.button>
+        </motion.div>
     );
-};
-
-export default LoginForm;
+}

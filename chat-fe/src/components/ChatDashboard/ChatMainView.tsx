@@ -4,8 +4,10 @@ import ChatLayout from "../Chat/ChatLayout";
 import useChat from "../../hooks/useChat";
 import { useAuthContext } from "../../context/AuthContext";
 
+import { UserItem } from "../../hooks/useUserList";
+
 interface Props {
-    selectedRoom: string | null;
+    selectedRoom: UserItem | null;
     theme: "dark" | "light";
     user: {
         name: string;
@@ -19,7 +21,9 @@ const ChatMainView: React.FC<Props> = ({ selectedRoom, theme, user }) => {
 
     useEffect(() => {
         if (selectedRoom) {
-            chat.selectChat("people", selectedRoom);
+            // Use specific type if available, default to 'people'
+            const type = selectedRoom.type || "people";
+            chat.selectChat(type, selectedRoom.name);
         }
     }, [selectedRoom]);
 
@@ -56,23 +60,15 @@ const ChatMainView: React.FC<Props> = ({ selectedRoom, theme, user }) => {
         <div style={{ flex: 1, color: textColor }}>
             {/* Nếu ChatLayout cần user và selectedRoom, hãy truyền */}
             {/* <ChatLayout roomId={selectedRoom} user={user} /> */}
-            <ChatLayout user={{
-                name: "",
-                username: "",
-                avatar: ""
-            }} theme={"dark"} />
-
+            <ChatLayout
+                roomName={selectedRoom.name}
+                user={user}
+                theme={theme}
+                messages={chat.messages}
+                onSend={chat.sendMessage}
+            />
         </div>
-      </div>
     );
-  }
-
-  // khi đã chọn phòng, render ChatLayout (nơi hiển thị lịch sử và input)
-  return (
-    <div style={{ flex: 1, color: textColor }}>
-      <ChatLayout />
-    </div>
-  );
 };
 
 export default ChatMainView;

@@ -1,14 +1,21 @@
 import React, { useState } from "react";
+import SidebarIcon from "./SidebarIcon";
+import ChatSidebar from "./ChatSidebar";
 import ChatMainView from "./ChatMainView";
 import { useAuthContext } from "../../context/AuthContext";
 
 
+import { UserItem } from "../../hooks/useUserList";
+
 const ChatDashboard: React.FC = () => {
     // Lấy user từ backend/context/api
-    const { user } = useAuthContext();
-    const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+    const { user, logout } = useAuthContext();
+    const [selectedRoom, setSelectedRoom] = useState<UserItem | null>(null);
 
-    if (!user) return null;
+    // State cho popup avatar/profile/setting
+    const [showAccountDialog, setShowAccountDialog] = useState(false);
+    const [showSettingDialog, setShowSettingDialog] = useState(false);
+    const [hoverPopupIdx, setHoverPopupIdx] = useState<number | null>(null);
 
     // --- Theme state và xử lý theme ---
     const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -51,7 +58,8 @@ const ChatDashboard: React.FC = () => {
                 borderBottom: theme === "dark" ? "2px solid #191919" : "2px solid #eee",
                 letterSpacing: 0.2,
                 zIndex: 2,
-                position: "relative"
+                position: "relative",
+                flexShrink: 0
             }}>
                 App chat - {user.username}
                 {/* ICON đổi theme */}
@@ -156,6 +164,10 @@ const ChatDashboard: React.FC = () => {
                         }}
                         onMouseEnter={() => setHoverPopupIdx(2)}
                         onMouseLeave={() => setHoverPopupIdx(null)}
+                        onClick={() => {
+                            setShowAccountDialog(false);
+                            logout();
+                        }}
                     >Đăng xuất</div>
                     <div
                         style={{
@@ -242,6 +254,10 @@ const ChatDashboard: React.FC = () => {
                         }}
                         onMouseEnter={() => setHoverPopupIdx(13)}
                         onMouseLeave={() => setHoverPopupIdx(null)}
+                        onClick={() => {
+                            setShowSettingDialog(false);
+                            logout();
+                        }}
                     >
                         Đăng xuất
                     </div>
