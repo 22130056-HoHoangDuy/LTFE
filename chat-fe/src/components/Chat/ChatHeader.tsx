@@ -1,6 +1,6 @@
 // ChatHeader.tsx
 import React, { useState } from "react";
-import RoomList from "../RoomList/RoomList";
+import RoomPage from "../RoomList/RoomPage";
 
 const ChatHeader: React.FC = () => {
     const [showRoom, setShowRoom] = useState(false);
@@ -52,7 +52,7 @@ const ChatHeader: React.FC = () => {
                         overflow: "hidden"
                     }}
                 >
-                    <RoomList />
+                    <RoomPage />
                 </div>
             )}
         </>

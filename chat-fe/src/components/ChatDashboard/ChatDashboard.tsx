@@ -3,6 +3,7 @@ import SidebarIcon from "./SidebarIcon";
 import ChatSidebar from "./ChatSidebar";
 import ChatMainView from "./ChatMainView";
 
+
 // Giả định có UserContext hoặc lấy từ props/hook
 const mockUser = {
     name: "Nguyễn Minh Hào",
@@ -12,6 +13,7 @@ const mockUser = {
 
 const ChatDashboard: React.FC = () => {
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+
 
     // State cho popup avatar/profile/setting
     const [showAccountDialog, setShowAccountDialog] = useState(false);
@@ -41,6 +43,7 @@ const ChatDashboard: React.FC = () => {
             }}>
                 App chat - {mockUser.name}
             </div>
+
             {/* BODY - 3 cột dưới (icon | sidebar | main) */}
             <div style={{ display: "flex", flex: 1, minHeight: 0, minWidth: 0 }}>
                 {/* Column 1: SidebarIcon */}
@@ -123,6 +126,8 @@ const ChatDashboard: React.FC = () => {
                     >×</div>
                 </div>
             )}
+
+
         </div>
     );
 };

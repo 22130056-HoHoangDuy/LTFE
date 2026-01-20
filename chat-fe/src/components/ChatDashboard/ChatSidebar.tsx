@@ -11,6 +11,8 @@ interface Props {
     user: User;
     onSelectRoom: (roomId: string) => void;
     selectedRoom: string | null;
+
+
 }
 
 // const roomListMock = Array.from({ length: 5 }, (_, i) => ({
@@ -56,7 +58,8 @@ const ChatSidebar: React.FC<Props> = ({
                     // Chỗ này để xử lý tìm kiếm room
                 />
             </div>
-            <button style={{
+            <button
+                style={{
                 marginBottom: 15,
                 border: "2px solid #fff",
                 background: "transparent",
