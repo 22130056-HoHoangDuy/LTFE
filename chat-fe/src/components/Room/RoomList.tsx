@@ -3,7 +3,8 @@ import React from "react";
 interface Room {
     id?: string;
     name?: string;
-    time?: string;
+    avatar?: string;
+    lastMessageTime?: string;
     [key: string]: any;
 }
 
@@ -11,9 +12,18 @@ interface Props {
     rooms: any[]; // nhận cả string hoặc object từ server
     selectedRoomId: string | null;
     onSelectRoom: (roomId: string) => void;
+    theme: "dark" | "light";
 }
 
-const RoomList: React.FC<Props> = ({ rooms, selectedRoomId, onSelectRoom }) => {
+const RoomList: React.FC<Props> = ({ rooms, selectedRoomId, onSelectRoom, theme }) => {
+    // Đổi màu theo theme
+    const bgSelected = theme === "dark" ? "#244D3D" : "#e6f3eb";
+    const bg = theme === "dark" ? "#1a1a1a" : "#fff";
+    const text = theme === "dark" ? "#fff" : "#222";
+    const borderSelected = theme === "dark" ? "2px solid #1DB954" : "2px solid #29b474";
+    const border = "2px solid transparent";
+    const timeColor = theme === "dark" ? "#b0b0b0" : "#888";
+
     return (
         <>
             {rooms.map((roomRaw, idx) => {
@@ -39,13 +49,13 @@ const RoomList: React.FC<Props> = ({ rooms, selectedRoomId, onSelectRoom }) => {
                         style={{
                             borderRadius: 7,
                             padding: "10px 8px",
-                            background: selectedRoomId === id ? "#244D3D" : "#1a1a1a",
-                            color: "#fff",
+                            background: selectedRoomId === id ? bgSelected : bg,
+                            color: text,
                             display: "flex",
                             alignItems: "center",
                             marginBottom: 6,
                             cursor: "pointer",
-                            border: selectedRoomId === id ? "2px solid #1DB954" : "2px solid transparent",
+                            border: selectedRoomId === id ? borderSelected : border,
                         }}
                     >
                         <img
@@ -62,11 +72,11 @@ const RoomList: React.FC<Props> = ({ rooms, selectedRoomId, onSelectRoom }) => {
                                     marginLeft: "auto",
                                     marginRight: 6,
                                     fontSize: "0.9em",
-                                    color: "#b0b0b0",
+                                    color: timeColor,
                                 }}
                             >
-                {time}
-              </span>
+                                {time}
+                            </span>
                         )}
                     </div>
                 );
