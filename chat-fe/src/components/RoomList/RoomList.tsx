@@ -15,7 +15,7 @@ const RoomList: React.FC<Props> = ({ rooms, onSelectRoom }) => {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {rooms.length === 0 && (
                 <div style={{ color: "#aaa", fontSize: 13 }}>
-                    Chưa tham gia phòng nào
+                    Chưa tham gia phòng nào 
                 </div>
             )}
 
