@@ -5,6 +5,7 @@ import socket from "../api/socket";
 export type UserItem = {
     id: string;
     name: string;
+    type?: "room" | "people";
 };
 
 export default function useUserList() {
@@ -26,18 +27,29 @@ export default function useUserList() {
                 // nếu server trả về string hoặc number
                 if (typeof u === "string" || typeof u === "number") {
                     const id = String(u);
-                    return { id, name: id };
+                    // Default to people if just a string, unless we have convention. 
+                    // But usually simple strings are usernames.
+                    return { id, name: id, type: "people" as const };
                 }
 
                 // nếu server trả về object
                 if (typeof u === "object" && u !== null) {
                     const id = String(u.id ?? u.userId ?? u.username ?? idx);
                     const name = String(u.name ?? u.username ?? u.user ?? id);
-                    return { id, name };
+                    // Try to detect type or use existing
+                    let type: "room" | "people" = "people";
+                    
+                    if (u.type === "room" || u.type === "people") {
+                        type = u.type;
+                    } else if (u.roomId || u.roomName) {
+                        type = "room";
+                    }
+
+                    return { id, name, type };
                 }
 
                 // fallback
-                return { id: String(idx), name: String(u) };
+                return { id: String(idx), name: String(u), type: "people" as const };
             });
 
             setUsers(normalized);

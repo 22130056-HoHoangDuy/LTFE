@@ -50,7 +50,10 @@ const SidebarIcon: React.FC<Props> = ({
     const avatarBoxBg = theme === "dark" ? "#444" : "#eaeaeb";
 
     // Xác định src cho icon thường và icon hover
-    const avatarSrc = hoverIdx === 0 ? user.avatar.replace('.svg', '1.svg') : user.avatar;
+    const defaultAvatar = "/icons/avatar.svg";
+    const avatarSrc = hoverIdx === 0
+        ? (user.avatar ? user.avatar.replace('.svg', '1.svg') : defaultAvatar)
+        : (user.avatar || defaultAvatar);
     const chatSrc = hoverIdx === 1 ? "/icons/chat1.svg" : "/icons/chat.svg";
     const roomSrc = hoverIdx === 2 ? "/icons/contact1.svg" : "/icons/contact.svg";
     const settingSrc = hoverIdx === 3 ? "/icons/setting1.svg" : "/icons/setting.svg";

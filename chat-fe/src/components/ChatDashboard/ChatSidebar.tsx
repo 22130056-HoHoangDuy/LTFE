@@ -2,12 +2,9 @@ import React, { useMemo, useState } from "react";
 import { chatDashboardColors as c } from "./dashboardStyles";
 import RoomList from "../Room/RoomList";
 import useUserList from "../../hooks/useUserList";
-import CreateRoomModal from "../Room/CreateRoomModel";
-import socketService from "../../api/socket";
-import { useEffect } from "react";
+import socket from "../../api/socket";
 
-
-
+import { UserItem } from "../../hooks/useUserList";
 
 interface Props {
     user: {
@@ -15,8 +12,8 @@ interface Props {
         username: string;
         avatar?: string;
     };
-    selectedRoom: string | null;
-    onSelectRoom: (username: string) => void;
+    selectedRoom: UserItem | null;
+    onSelectRoom: (item: UserItem) => void;
     theme: "dark" | "light";
 }
 
@@ -31,80 +28,28 @@ const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom, theme 
     const [hoverCreate, setHoverCreate] = useState(false);
     const [searchFocus, setSearchFocus] = useState(false);
 
-    const [openCreate, setOpenCreate] = useState(false);
+    // State tạo phòng
+    const [isCreating, setIsCreating] = useState(false);
+    const [newRoomName, setNewRoomName] = useState("");
 
-    const [rooms, setRooms] = useState<{ id: string; name: string; time: string }[]>([]);
+    const handleCreateRoom = () => {
+        if (!newRoomName.trim()) return;
 
-    const handleCreateRoom = (roomName: string) => {
-        const tempId = "temp-" + Date.now();
-        // 👇 1. hiện phòng ngay lập tức
-        setRooms((prev) => [
-            { id: tempId, name: roomName, time: "" },
-            ...prev,
-        ]);
-
-        // 👇 2. gửi WS lên backend
-        const payload = {
+        socket.send({
             action: "onchat",
             data: {
                 event: "CREATE_ROOM",
-                data: { name: roomName },
-            },
-        };
+                data: { name: newRoomName }
+            }
+        });
 
-        socketService.send(payload);
+        setNewRoomName("");
+        setIsCreating(false);
+        // Có thể cần reload user list hoặc server sẽ tự push update
     };
 
-
-
-    useEffect(() => {
-        socketService.connect();
-        const off = socketService.onMessage((msg) => {
-            console.log("WS IN:", msg);
-
-            // backend wrap: { action, data: { event, data } }
-            if (msg?.data?.event === "ROOM_CREATED") {
-                const room = msg.data.data;
-
-                setRooms((prev) => {
-                    // 👇 xóa phòng temp cùng tên
-                    const filtered = prev.filter(
-                        (r) => !r.id.startsWith("temp-") || r.name !== room.name
-                    );
-
-                    return [
-                        {
-                            id: String(room.id),
-                            name: room.name,
-                            time: "",
-                        },
-                        ...filtered,
-                    ];
-                });
-            }
-        });
-
-        return off; // cleanup listener
-    }, []);
-
-
-
-    // normalize users thành { id, name }
-    const users = useMemo(() => {
-        if (!Array.isArray(usersRaw)) return [];
-        return usersRaw.map((u: any, idx: number) => {
-            if (typeof u === "string" || typeof u === "number") {
-                const id = String(u);
-                return { id, name: id };
-            }
-            if (typeof u === "object" && u !== null) {
-                const id = String(u.id ?? u.userId ?? u.username ?? idx);
-                const name = String(u.name ?? u.username ?? u.user ?? id);
-                return { id, name };
-            }
-            return { id: String(idx), name: String(u) };
-        });
-    }, [usersRaw]);
+    // usersRaw is now UserItem[]
+    const users = usersRaw;
 
     const filteredUsers = useMemo(() => {
         if (!keyword.trim()) return users;
@@ -196,35 +141,50 @@ const ChatSidebar: React.FC<Props> = ({ user, selectedRoom, onSelectRoom, theme 
                 }}
                 onMouseEnter={() => setHoverCreate(true)}
                 onMouseLeave={() => setHoverCreate(false)}
-                onClick={() => setOpenCreate(true)}   // 👈 mở modal
+                onClick={() => setIsCreating(!isCreating)}
             >
-
-                Tạo phòng
+                {isCreating ? "Hủy" : "Tạo phòng"}n
             </button>
+
+            {isCreating && (
+                <div style={{ marginBottom: 15, display: "flex", gap: 5 }}>
+                    <input
+                        value={newRoomName}
+                        onChange={(e) => setNewRoomName(e.target.value)}
+                        placeholder="Tên phòng..."
+                        style={{
+                            flex: 1,
+                            background: inputBg,
+                            color: inputText,
+                            border: `1px solid ${searchBorderFocus}`,
+                            borderRadius: 4,
+                            padding: "5px 8px",
+                            outline: "none",
+                            minWidth: 0
+                        }}
+                    />
+                    <button
+                        onClick={handleCreateRoom}
+                        style={{
+                            background: buttonBgHover,
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: 4,
+                            padding: "5px 10px",
+                            cursor: "pointer",
+                            whiteSpace: "nowrap"
+                        }}
+                    >
+                        Tạo
+                    </button>
+                </div>
+            )}
             {/* 👥 USER LIST */}
             <div style={{ overflowY: "auto", flex: 1 }}>
                 <RoomList
-                    rooms={[
-                        ...rooms,
-                        ...filteredUsers.map((u) => ({
-                            id: u.id,
-                            name: u.name,
-                            time: "",
-                        })),
-                    ]}
-                    selectedRoomId={selectedRoom}
-                    onSelectRoom={onSelectRoom} theme={"dark"}                />
-            </div>
-
-            <CreateRoomModal
-                open={openCreate}
-                onClose={() => setOpenCreate(false)}
-                theme={theme}
-                onCreateRoom={handleCreateRoom}
-            />
-
-
-
+                    rooms={filteredUsers}
+                    selectedRoomId={selectedRoom?.id || null}
+                    onSelectRoom={onSelectRoom} theme={theme} /> </div>
         </div>
 
     );

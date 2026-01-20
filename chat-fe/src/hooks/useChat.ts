@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import socket from "../api/socket";
 import { ChatMessage, SocketMessage } from "../utils/types";
 import { useAuthContext } from "../context/AuthContext";
+import { decryptMessage, encryptMessage } from "../utils/crypto";
 
 export type UserItem = {
     id: string;
@@ -20,27 +21,76 @@ export default function useChat() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [users, setUsers] = useState<UserItem[]>([]);
 
-    // helper: normalize any incoming content to a safe string
-    const normalizeContent = (raw: any) => {
-        if (raw == null) return "";
-        if (typeof raw === "string" || typeof raw === "number") return String(raw);
-        if (Array.isArray(raw)) {
-            return raw
-                .map((r) => (typeof r === "object" ? JSON.stringify(r) : String(r)))
-                .join(", ");
+    // helper: logic to parse message content from various sources
+    const processMessageData = (d: any) => {
+        let finalType = "text";
+        let finalContent = "";
+        let finalExtra = {};
+
+        // raw content might be in d.mes or d.content or d itself
+        let rawContent = d?.mes ?? d?.content ?? d;
+
+        // DECRYPT if it's a string
+        if (typeof rawContent === "string") {
+            // Attempt to decrypt. If it's not encrypted or fails, it returns original.
+            rawContent = decryptMessage(rawContent);
         }
-        // object: try common fields
-        const name = raw.name ?? raw.user ?? "";
-        const action = raw.action ?? raw.type ?? "";
-        const actionTime = raw.actionTime ?? raw.time ?? raw.createdAt ?? "";
-        if (name || action || actionTime) {
-            return `${name} ${action} ${actionTime ? `lúc ${actionTime}` : ""}`.trim();
+
+        if (rawContent == null) return { type: "text", content: "" };
+
+        // 1. If it's an object with type file/audio/sticker/image (already parsed)
+        if (typeof rawContent === "object" && rawContent.type && ["file", "audio", "sticker", "image"].includes(rawContent.type)) {
+            finalType = rawContent.type;
+            finalContent = rawContent.content;
+            if (rawContent.fileName) finalExtra = { fileName: rawContent.fileName, fileType: rawContent.fileType };
         }
-        try {
-            return JSON.stringify(raw);
-        } catch {
-            return String(raw);
+        // 2. If it's a string, try to parse details
+        else if (typeof rawContent === "string") {
+            // Optimization: check if it looks like JSON before parsing
+            const trimmed = rawContent.trim();
+            if (trimmed.startsWith("{") && (trimmed.includes('"type":"file"') || trimmed.includes('"type":"audio"') || trimmed.includes('"type":"sticker"') || trimmed.includes('"type":"image"'))) {
+                try {
+                    const parsed = JSON.parse(rawContent);
+                    if (parsed && ["file", "audio", "sticker", "image"].includes(parsed.type)) {
+                        finalType = parsed.type;
+                        finalContent = parsed.content;
+                        if (parsed.fileName) finalExtra = { fileName: parsed.fileName, fileType: parsed.fileType };
+                    } else {
+                        // parsed but not our type -> treat as text
+                        finalContent = rawContent;
+                    }
+                } catch {
+                    // Not JSON -> treat as text
+                    finalContent = rawContent;
+                }
+            } else {
+                finalContent = rawContent;
+            }
         }
+        // 3. Fallback normalization for other objects/arrays
+        else {
+            if (Array.isArray(rawContent)) {
+                finalContent = rawContent.map((r) => (typeof r === "object" ? JSON.stringify(r) : String(r))).join(", ");
+            } else if (typeof rawContent === "object") {
+                // Try to extract text fields if not our special type
+                const name = rawContent.name ?? rawContent.user ?? "";
+                const action = rawContent.action ?? rawContent.type ?? "";
+                const actionTime = rawContent.actionTime ?? rawContent.time ?? rawContent.createdAt ?? "";
+                if (name || action || actionTime) {
+                    finalContent = `${name} ${action} ${actionTime ? `lúc ${actionTime}` : ""}`.trim();
+                } else {
+                    finalContent = JSON.stringify(rawContent);
+                }
+            } else {
+                finalContent = String(rawContent);
+            }
+        }
+
+        return {
+            type: finalType,
+            content: finalContent,
+            ...finalExtra
+        };
     };
 
     useEffect(() => {
@@ -81,13 +131,27 @@ export default function useChat() {
                 msg.event === "GET_PEOPLE_CHAT_MESS"
             ) {
                 if (Array.isArray(msg.data)) {
-                    const normalized = msg.data.map((m: any) => ({
-                        type: "text" as const,
-                        sender: m.from ?? m.sender ?? "unknown",
-                        content: normalizeContent(m.mes ?? m.content ?? m),
-                        time: m.time ?? m.actionTime ?? "",
-                    }));
-                    setMessages(normalized);
+                    // Use flatMap or filter to remove nulls (failed parses)
+                    const normalized = msg.data.map((m: any) => {
+                        try {
+                            const processed = processMessageData(m);
+                            return {
+                                type: processed.type as any,
+                                sender: m.from ?? m.sender ?? "unknown",
+                                content: processed.content,
+                                fileName: (processed as any).fileName,
+                                fileType: (processed as any).fileType,
+                                time: m.time ?? m.actionTime ?? "",
+                            };
+                        } catch (e) {
+                            console.error("Error parsing history message:", m, e);
+                            return null;
+                        }
+                    }).filter(Boolean) as ChatMessage[]; // remove nulls and cast
+                    // Reverse to show oldest first (top) -> newest last (bottom)
+                    setMessages(normalized.reverse());
+                } else {
+                    // unexpected format
                 }
                 return;
             }
@@ -97,7 +161,7 @@ export default function useChat() {
                 if (Array.isArray(msg.data)) {
                     const normalized = msg.data.map((m: any) => ({
                         type: "system" as const,
-                        content: normalizeContent(m),
+                        content: typeof m === "string" ? m : JSON.stringify(m),
                         time: m.actionTime ?? m.time ?? "",
                     }));
                     setMessages(normalized);
@@ -109,17 +173,23 @@ export default function useChat() {
             if (msg.event === "SEND_CHAT" || msg.event === "NEW_MESSAGE" || msg.event === "RECEIVE_MESSAGE") {
                 const d = msg.data;
                 if (!d) return;
-                const newMsg = {
-                    type: "text" as const,
+
+                const processed = processMessageData(d);
+                const newMsg: any = {
+                    type: processed.type,
                     sender: d.from ?? d.sender ?? "unknown",
-                    content: normalizeContent(d.mes ?? d.content ?? d),
+                    content: processed.content,
+                    fileName: (processed as any).fileName,
+                    fileType: (processed as any).fileType,
                     time: d.time ?? d.actionTime ?? new Date().toISOString(),
                 };
 
                 setMessages((prev) => {
                     // dedupe optimistic message if present: replace last optimistic with server message
                     const last = prev[prev.length - 1] as any;
-                    if (last && last._optimistic && last.sender === newMsg.sender && last.content === newMsg.content) {
+                    // Relaxed dedupe: check sender and (content OR type match)
+                    if (last && last._optimistic && last.sender === newMsg.sender) {
+                        // simple check to avoid duplication
                         return [...prev.slice(0, -1), newMsg];
                     }
                     return [...prev, newMsg];
@@ -130,10 +200,15 @@ export default function useChat() {
             // fallback: if msg.data looks like a single message object
             if (msg.data && typeof msg.data === "object" && (msg.data.mes || msg.data.content || msg.data.from)) {
                 const d = msg.data;
-                const newMsg = {
-                    type: "text" as const,
+
+                const processed = processMessageData(d);
+
+                const newMsg: any = {
+                    type: processed.type,
                     sender: d.from ?? d.sender ?? "unknown",
-                    content: normalizeContent(d.mes ?? d.content ?? d),
+                    content: processed.content,
+                    fileName: (processed as any).fileName,
+                    fileType: (processed as any).fileType,
                     time: d.time ?? d.actionTime ?? new Date().toISOString(),
                 };
                 setMessages((prev) => [...prev, newMsg]);
@@ -162,6 +237,7 @@ export default function useChat() {
         setMessages([]); // clear while loading
 
         try {
+            console.log("REQUESTING HISTORY:", type, target); // DEBUG
             socket.send({
                 action: "onchat",
                 data: {
@@ -176,22 +252,60 @@ export default function useChat() {
 
     // send message with optimistic update; uses current user from context
     const sendMessage = useCallback(
-        (mes: string) => {
-            if (!currentChat || !mes.trim()) return;
+        (content: string | { type: "file" | "audio" | "sticker" | "image", content: string, fileName?: string, fileType?: string }) => {
+            if (!currentChat) return;
+
+            // Normalize input
+            let mesContent = "";
+            let msgType = "text";
+            let extraData = {};
+
+            if (typeof content === "string") {
+                if (!content.trim()) return;
+                mesContent = content;
+            } else {
+                mesContent = content.content; // Base64
+                msgType = content.type;
+                if (content.type === "file" || content.type === "image") {
+                    extraData = { fileName: content.fileName, fileType: content.fileType };
+                }
+            }
 
             const currentUsername = user?.username ?? "me";
 
-            // optimistic message (flagged so we can replace if server echoes)
+            // optimistic message
             const optimistic: any = {
-                type: "text",
+                type: msgType,
                 sender: currentUsername,
-                content: mes,
+                content: mesContent,
                 time: new Date().toISOString(),
                 _optimistic: true,
+                ...extraData
             };
+
             setMessages((prev) => [...prev, optimistic]);
 
             try {
+                // If text, send as string to match legacy behavior, OR send object if server supports it.
+                // Assuming server expects 'mes' field. We can stringify object into 'mes' if server blindly broadcasts it.
+                // Or send distinct event? Plan says: "Hỗ trợ gửi object tin nhắn có type khác text"
+                // Let's assume we wrap it in a structure that the server handles or just JSON stringify it into 'mes'
+                // But wait, the previous code sent: mes: mes (string).
+
+                // Strategy: Send JSON string as 'mes' content if it's media, OR just rely on server handling objects.
+                // Let's try sending object as 'mes'.
+
+                const socketPayload = {
+                    type: msgType,
+                    content: mesContent,
+                    ...extraData
+                };
+
+                // ENCRYPT
+                // If text, encrypt text. If object, stringify then encrypt.
+                const rawString = msgType === "text" ? mesContent : JSON.stringify(socketPayload);
+                const encryptedMes = encryptMessage(rawString);
+
                 socket.send({
                     action: "onchat",
                     data: {
@@ -199,12 +313,11 @@ export default function useChat() {
                         data: {
                             type: currentChat.type,
                             to: currentChat.target,
-                            mes,
+                            mes: encryptedMes,
                         },
                     },
                 });
             } catch {
-                // if send fails, remove optimistic or mark as failed (simple approach: remove)
                 setMessages((prev) => prev.filter((m: any) => m !== optimistic));
             }
         },

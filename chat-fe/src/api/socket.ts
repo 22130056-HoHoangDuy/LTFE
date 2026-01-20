@@ -48,7 +48,6 @@ class SocketService {
 
     send(data: Record<string, any>) {
         if (this.socket?.readyState === WebSocket.OPEN) {
-            console.log("SEND:", data);
             this.socket.send(JSON.stringify(data));
         } else {
             console.warn("Socket not open, queue message");

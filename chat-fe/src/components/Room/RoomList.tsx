@@ -11,13 +11,13 @@ interface Room {
 interface Props {
     rooms: any[]; // nhận cả string hoặc object từ server
     selectedRoomId: string | null;
-    onSelectRoom: (roomId: string) => void;
+    onSelectRoom: (room: any) => void;
     theme: "dark" | "light";
 }
 
 const RoomList: React.FC<Props> = ({ rooms, selectedRoomId, onSelectRoom, theme }) => {
     // Đổi màu theo theme
-    const bgSelected = theme === "dark" ? "#244D3D" : "#e6f3eb";
+    const bgSelected = theme === "dark" ? "#2196f3" : "#e6f3eb";
     const bg = theme === "dark" ? "#1a1a1a" : "#fff";
     const text = theme === "dark" ? "#fff" : "#222";
     const borderSelected = theme === "dark" ? "2px solid #1DB954" : "2px solid #29b474";
@@ -45,7 +45,11 @@ const RoomList: React.FC<Props> = ({ rooms, selectedRoomId, onSelectRoom, theme 
                 return (
                     <div
                         key={key}
-                        onClick={() => onSelectRoom(id)}
+                        onClick={() => {
+                            // Construct a safe object to pass back if roomRaw is just string
+                            const item = isString ? { id, name, type: 'people' } : roomRaw;
+                            onSelectRoom(item);
+                        }}
                         style={{
                             borderRadius: 7,
                             padding: "10px 8px",

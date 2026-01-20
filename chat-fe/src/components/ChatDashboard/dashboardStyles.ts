@@ -5,11 +5,11 @@ export const chatDashboardColors = {
     sidebarBorder: '#333',
     input: '#1E1E1E',
     inputText: '#fff',
-    roomBgActive: '#244D3D',
+    roomBgActive: '#232E4E',
     roomBg: '#292929',
-    iconBg: '#1DB954',
-    iconBgHover: '#17A645',
+    iconBg: '#2196f3',
+    iconBgHover: '#1F49C6',
     menuBg: '#232323',
     menuText: '#fff',
-    menuHover: '#1DB954'
+    menuHover: '#1F49C6'
 };
