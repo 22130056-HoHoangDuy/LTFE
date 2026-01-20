@@ -61,8 +61,18 @@ const ChatMainView: React.FC<Props> = ({ selectedRoom, theme, user }) => {
                 username: "",
                 avatar: ""
             }} theme={"dark"} />
+
         </div>
+      </div>
     );
+  }
+
+  // khi đã chọn phòng, render ChatLayout (nơi hiển thị lịch sử và input)
+  return (
+    <div style={{ flex: 1, color: textColor }}>
+      <ChatLayout />
+    </div>
+  );
 };
 
 export default ChatMainView;

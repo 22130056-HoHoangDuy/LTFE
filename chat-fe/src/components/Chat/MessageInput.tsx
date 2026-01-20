@@ -11,11 +11,14 @@ type Props = {
 };
 
 const MessageInput: React.FC<Props> = ({ onSend, theme }) => {
+
     const [text, setText] = useState("");
 
     const handleSend = () => {
         if (!text.trim()) return;
+      
         onSend(text.trim());
+
         setText("");
     };
 
@@ -70,3 +73,4 @@ const MessageInput: React.FC<Props> = ({ onSend, theme }) => {
 };
 
 export default MessageInput;
+

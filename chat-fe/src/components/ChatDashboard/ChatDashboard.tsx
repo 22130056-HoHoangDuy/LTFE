@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import SidebarIcon from "./SidebarIcon";
-import ChatSidebar from "./ChatSidebar";
 import ChatMainView from "./ChatMainView";
 import { useAuthContext } from "../../context/AuthContext";
 
@@ -10,11 +8,7 @@ const ChatDashboard: React.FC = () => {
     const { user } = useAuthContext();
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
 
-    // State cho popup avatar/profile/setting
-    const [showAccountDialog, setShowAccountDialog] = useState(false);
-    const [showSettingDialog, setShowSettingDialog] = useState(false);
-    // State cho hiệu ứng hover text popup
-    const [hoverPopupIdx, setHoverPopupIdx] = useState<number | null>(null);
+    if (!user) return null;
 
     // --- Theme state và xử lý theme ---
     const [theme, setTheme] = useState<"dark" | "light">("dark");

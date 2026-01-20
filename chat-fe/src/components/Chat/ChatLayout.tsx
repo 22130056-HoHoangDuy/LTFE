@@ -1,6 +1,4 @@
 import React from "react";
-import ChatHeader from "./ChatHeader";
-import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import useChat from "../../hooks/useChat";
 
@@ -25,6 +23,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
 
     const chat = useChat();
 
+
     return (
         <div
             style={{
@@ -43,7 +42,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 theme={theme}
                 user={user}
                 onSend={chat.sendMessage}
-            />
+            />           
         </div>
     );
 };

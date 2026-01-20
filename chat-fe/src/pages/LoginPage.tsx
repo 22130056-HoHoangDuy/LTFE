@@ -1,13 +1,8 @@
 import AuthPage from "../components/Auth/AuthPage";
-import useAuth from "../hooks/useAuth";
-import { User } from "../utils/types";
+import { useAuthContext } from "../context/AuthContext";
 
 export default function LoginPage() {
-    const { login } = useAuth();
+    const { login } = useAuthContext();
 
-    const handleLoginSuccess = (user: User) => {
-        login(user);
-    };
-
-    return <AuthPage onAuthSuccess={handleLoginSuccess} />;
+    return <AuthPage onAuthSuccess={login} />;
 }

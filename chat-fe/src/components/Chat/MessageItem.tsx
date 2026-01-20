@@ -1,6 +1,6 @@
 import React from "react";
 
-export type Message = {
+export type MessageUI = {
     text: string;
     timestamp: string;
     avatar?: string;
