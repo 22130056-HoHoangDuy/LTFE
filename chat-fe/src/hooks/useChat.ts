@@ -214,6 +214,7 @@ export default function useChat() {
     return {
         users,
         messages,
+        currentChat,
         selectChat,
         sendMessage,
         loadUserList,

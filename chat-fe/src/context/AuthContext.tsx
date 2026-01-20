@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 export type User = {
     username: string;
@@ -15,9 +15,31 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const login = (u: User) => setUser(u);
-    const logout = () => setUser(null);
+    useEffect(() => {
+        const stored = localStorage.getItem("chat_user");
+        if (stored) {
+            try {
+                setUser(JSON.parse(stored));
+            } catch {
+                localStorage.removeItem("chat_user");
+            }
+        }
+        setLoading(false);
+    }, []);
+
+    const login = (u: User) => {
+        setUser(u);
+        localStorage.setItem("chat_user", JSON.stringify(u));
+    };
+
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem("chat_user");
+    };
+
+    if (loading) return null; // or a spinner
 
     return (
         <AuthContext.Provider
